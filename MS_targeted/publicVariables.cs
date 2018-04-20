@@ -78,17 +78,17 @@ namespace MS_targeted
             Rscript = "20170808_MS_script.R";
             exodiabVariables.setExodiabVariables();
 
-            printTheMetaboliteDetails = false;
-            printBoxplots = false;
-            printScatterplots = false;
-            printPathwaysForMetabolites = false;
-            printMetaboliteStatistics = false;
-            printCorrelationsMetabolitesToCovariates = false;
-            printMetabolitesForDatabase = false;
-            printRosettaDatasets = false;
-            printCorrelationsMetabolitesToMetabolites = true;
-            printOutputForMoDentify = false;
-            printRatiosOfMetabolites = true;
+            printTheMetaboliteDetails = true;
+            printBoxplots = true;
+            printScatterplots = true;
+            printPathwaysForMetabolites = true;
+            printMetaboliteStatistics = true;
+            printCorrelationsMetabolitesToCovariates = true;
+            printMetabolitesForDatabase = true;
+            printRosettaDatasets = true;
+            printCorrelationsMetabolitesToMetabolites = false;
+            printOutputForMoDentify = true;
+            printRatiosOfMetabolites = false;
     }
 
         public static void Close()
