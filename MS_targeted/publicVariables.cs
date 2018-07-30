@@ -12,12 +12,6 @@ namespace MS_targeted
         public static string clinicalDataFile { get; set; }
         public static string databaseFile { get; set; }
         public static string outputDir { get; set; }
-        public enum donorSourceValues
-        {
-            exodiab,
-            patients
-        }
-        public static donorSourceValues donorSource { get; set; }
         public enum prefixValues
         {
             lcms,
@@ -31,9 +25,6 @@ namespace MS_targeted
             three
         }
         public static numberOfClassesValues numberOfClasses { get; set; }
-        public static double significanceThreshold { get; set; }
-        public static double ratioUpperThreshold { get; set; }
-        public static double ratioLowerThreshold { get; set; }
         public static int numberOfPermutations { get; set; }
 
         //other variables
@@ -43,8 +34,7 @@ namespace MS_targeted
         public static int numOfCharges { get; set; }
         public static string logFile { get; set; }
         public static List<string> excludedPhenotypes { get; set; }
-        public static bool permutationTest { get; set; }
-        public static string Rscript { get; set; }
+        public static List<string> normCovars { get; set; }
 
         //what to print
         public static bool printTheMetaboliteDetails { get; set; }
@@ -58,12 +48,10 @@ namespace MS_targeted
         public static bool printCorrelationsMetabolitesToMetabolites { get; set; }
         public static bool printOutputForMoDentify { get; set; }
         public static bool printRatiosOfMetabolites { get; set; }
+        public static bool printRegressionStatistics { get; set; }
 
         public static void setOtherVariables()
         {
-            significanceThreshold = 0.1;
-            ratioLowerThreshold = 0.5;
-            ratioUpperThreshold = 1.5;
             numberOfPermutations = 100000;
             suffix = Path.GetExtension(@"" + Directory.GetFiles(@"" + inputMSFilesDir).Where(x => x.Split(Path.DirectorySeparatorChar).Last().StartsWith(prefix.ToString())).First());
             breakCharInFile = (suffix == ".tsv") ? '\t' : ',';
@@ -74,22 +62,21 @@ namespace MS_targeted
             outputToLog.initializeLogFile(logFile);
             rEngineInstance.initializeREngine("", "");
             excludedPhenotypes = new List<string>() { "U" };
-            permutationTest = true;
-            Rscript = "20170808_MS_script.R";
-            exodiabVariables.setExodiabVariables();
+            normCovars = new List<string>() { "HbA1c", "GSIS", "sampleWeight" }.Select(x => x.ToLower()).ToList();
 
             printTheMetaboliteDetails = true;
-            printBoxplots = true;
-            printScatterplots = true;
-            printPathwaysForMetabolites = true;
+            printBoxplots = false;
+            printScatterplots = false;
+            printPathwaysForMetabolites = false;
             printMetaboliteStatistics = true;
-            printCorrelationsMetabolitesToCovariates = true;
-            printMetabolitesForDatabase = true;
-            printRosettaDatasets = true;
+            printCorrelationsMetabolitesToCovariates = false;
+            printMetabolitesForDatabase = false;
+            printRosettaDatasets = false;
             printCorrelationsMetabolitesToMetabolites = false;
-            printOutputForMoDentify = true;
+            printOutputForMoDentify = false;
             printRatiosOfMetabolites = false;
-    }
+            printRegressionStatistics = true;
+        }
 
         public static void Close()
         {
@@ -103,23 +90,6 @@ namespace MS_targeted
             {
                 input.ReadLine();
                 return (input.ReadLine().Split(breakCharInFile).ToList().IndexOf("Metabolite"));
-            }
-        }
-
-        public static void setDonorSource(string ds)
-        {
-            switch (ds.ToLower())
-            {
-                case "exodiab":
-                    donorSource = donorSourceValues.exodiab;
-                    break;
-                case "patients":
-                    donorSource = donorSourceValues.patients;
-                    break;
-                default:
-                    Console.WriteLine("The donor source was incorrectly defined!");
-                    Environment.Exit(0);
-                    break;
             }
         }
 
@@ -143,18 +113,19 @@ namespace MS_targeted
             }
         }
 
-        public static void setNumberOfClasses(string noc)
+        public static void setNumberOfClasses()
         {
-            switch (noc.ToLower())
+            switch (clinicalData.List_clinicalData.Select(x => x.Phenotype).Where(x => !excludedPhenotypes.Contains(x)).Distinct().Count())
             {
-                case "2":
+                case 2:
                     numberOfClasses = numberOfClassesValues.two;
                     break;
-                case "3":
+                case 3:
                     numberOfClasses = numberOfClassesValues.three;
                     break;
                 default:
-                    Console.WriteLine("Number of classes was incorrectly defined!");
+                    Console.WriteLine("Number of classes was incorrectly defined as " +
+                        clinicalData.List_clinicalData.Select(x => x.Phenotype).Where(x => !excludedPhenotypes.Contains(x)).Distinct().Count().ToString() + "!");
                     Environment.Exit(0);
                     break;
             }
@@ -196,94 +167,9 @@ namespace MS_targeted
                 }
             }
 
-            if (significanceThreshold > 1.0 || significanceThreshold < 0.0)
-            {
-                outputToLog.WriteErrorLine("The significance threshold was incorrectly set!");
-            }
-
             if (numberOfPermutations > 1000000 || numberOfPermutations < 100)
             {
                 outputToLog.WriteErrorLine("The number of permutations was incorrectly set!");
-            }
-        }
-
-        public static class exodiabVariables
-        {
-            public static int sampleMetadataStartingPoint { get; set; }
-            public static int tissueChargeStep { get; set; }
-            public static List<Tuple<string, string>> tissueChargeList { get; set; }
-            public static int columnsOfMetadataLimit { get; set; }
-
-            public static void setExodiabVariables()
-            {
-                setExodiabTissueChargeStep();
-                setExodiabSampleMetadataStartingPoint();
-                setExodiabTissueChargeList();
-            }
-
-            public static void setExodiabTissueChargeStep()
-            {
-                if (prefix == prefixValues.lcms)
-                {
-                    tissueChargeStep = 2;
-                }
-                else if (prefix == prefixValues.gcms)
-                {
-                    tissueChargeStep = 4;
-                }
-                else if (prefix == prefixValues.mixed)
-                {
-                    tissueChargeStep = 4;
-                }
-                else
-                {
-                    outputToLog.WriteErrorLine("Could not set tissueChargeStep. The prefix value is not set properly!");
-                }
-            }
-
-            public static void setExodiabSampleMetadataStartingPoint()
-            {
-                if (donorSource == donorSourceValues.exodiab)
-                {
-                    sampleMetadataStartingPoint = 19;
-                }
-                else if (donorSource == donorSourceValues.patients)
-                {
-                    sampleMetadataStartingPoint = -1;
-                }
-                else
-                {
-                    outputToLog.WriteErrorLine("Could not set sampleMetadataStartingPoint. The donorSource value is not set properly!");
-                }
-            }
-
-            public static void setExodiabTissueChargeList()
-            {
-                tissueChargeList = new List<Tuple<string, string>>();
-                using (TextReader input = new StreamReader(@"" + clinicalDataFile))
-                {
-                    List<string> breakLineAtTab = input.ReadLine().Split(breakCharInFile).ToList();
-                    columnsOfMetadataLimit = breakLineAtTab.Count;
-                    for (int i = sampleMetadataStartingPoint; i < (breakLineAtTab.Count - 1); i += tissueChargeStep)
-                    {
-                        if (prefix == prefixValues.lcms)
-                        {
-                            tissueChargeList.Add(new Tuple<string, string>(breakLineAtTab.ElementAt(i).Split('_').First().ToLower(), breakLineAtTab.ElementAt(i).Split('_').Last().ToLower()));
-                        }
-                        else if (prefix == prefixValues.gcms)
-                        {
-                            tissueChargeList.Add(new Tuple<string, string>(breakLineAtTab.ElementAt(i).Split('_').First().ToLower(), "None".ToLower()));
-                        }
-                        else if (prefix == prefixValues.mixed)
-                        {
-                            tissueChargeList.Add(new Tuple<string, string>(breakLineAtTab.ElementAt(i).Split('_').First().ToLower(), "None".ToLower()));
-                        }
-                        else
-                        {
-                            outputToLog.WriteErrorLine("Could not set tissueChargeList. The prefix value is not set properly!");
-                        }
-                    }
-                }
             }
         }
     }

@@ -58,7 +58,6 @@ namespace MS_targeted
 
             if (publicVariables.printMetaboliteStatistics)
             {
-                //print significant metabolites
                 string metaboliteSignificanceDirectory = Path.Combine(publicVariables.outputDir, "metabolite_significance");
                 if (Directory.Exists(@"" + metaboliteSignificanceDirectory))
                 {
@@ -67,6 +66,19 @@ namespace MS_targeted
                 Directory.CreateDirectory(@"" + metaboliteSignificanceDirectory);
                 string metabolitesSignificanceImputeFile = Path.Combine(metaboliteSignificanceDirectory, "metabolite_significance");
                 printMetaboliteStatistics(metabolitesSignificanceImputeFile);
+            }
+
+            if (publicVariables.printRegressionStatistics)
+            {
+                //print significant metabolites
+                string metaboliteRegressionDirectory = Path.Combine(publicVariables.outputDir, "metabolite_regression");
+                if (Directory.Exists(@"" + metaboliteRegressionDirectory))
+                {
+                    Directory.Delete(@"" + metaboliteRegressionDirectory, true);
+                }
+                Directory.CreateDirectory(@"" + metaboliteRegressionDirectory);
+                string metaboliteRegressionFile = Path.Combine(metaboliteRegressionDirectory, "metabolite_regression");
+                printMetaboliteRegressionStatistics(metaboliteRegressionFile);
             }
 
             if (publicVariables.printCorrelationsMetabolitesToCovariates)
@@ -196,232 +208,121 @@ namespace MS_targeted
 
         private static void printPathwaysForMetabolites(string outputFilePrefix)
         {
-            string line_to_print, pairwiseTest;
+            string pairwiseTest;
             foreach (string tissue in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct())
             {
-                using (TextWriter output_significant = new StreamWriter(@"" + outputFilePrefix + "_significant_" + tissue + publicVariables.suffix))
+                using (TextWriter output = new StreamWriter(@"" + outputFilePrefix + "_" + tissue + publicVariables.suffix))
                 {
-                    using (TextWriter output_all = new StreamWriter(@"" + outputFilePrefix + "_" + tissue + publicVariables.suffix))
+                    pairwiseTest = (publicVariables.numberOfClasses == publicVariables.numberOfClassesValues.two) ? "" : "pVal" + publicVariables.breakCharInFile;
+                    for (int i = 0; i < msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.Count; i++)
                     {
-                        pairwiseTest = (publicVariables.numberOfClasses == publicVariables.numberOfClassesValues.two) ? "" : "pVal" + publicVariables.breakCharInFile;
-                        for (int i = 0; i < msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.Count; i++)
-                        {
-                            pairwiseTest += msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "v" +
-                                msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "r" + publicVariables.breakCharInFile +
-                                msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "v" +
-                                msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "p" + publicVariables.breakCharInFile;
-                        }
-                        pairwiseTest = pairwiseTest.Substring(0, pairwiseTest.Length - 1);
+                        pairwiseTest += msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "v" +
+                            msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "r" + publicVariables.breakCharInFile +
+                            msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "v" +
+                            msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "p" + publicVariables.breakCharInFile;
+                    }
+                    pairwiseTest = pairwiseTest.Substring(0, pairwiseTest.Length - 1);
 
-                        line_to_print = string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}{0}{14}{0}{15}{0}{16}",
-                                                      publicVariables.breakCharInFile,
-                                                      "SuperPathway",
-                                                      "SubPathwayID",
-                                                      "SubPathway",
-                                                      "PathwayCount",
-                                                      "BiochemicalName",
-                                                      "Formula",
-                                                      "Platform",
-                                                      "Charge",
-                                                      pairwiseTest,
-                                                      "CAS",
-                                                      "HMDB",
-                                                      "KEGG",
-                                                      "ChEBI",
-                                                      "PubChem",
-                                                      "CustID",
-                                                      "Genes"
-                                                      );
-                        output_significant.WriteLine(line_to_print);
-                        output_all.WriteLine(line_to_print);
-
-                        foreach (string charge in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct())
-                        {
-                            foreach (string currPathwayID in msMetaboliteLevels.List_SampleForTissueAndCharge.SelectMany(x => x.ListOfMetabolites).Select(x => x.mtbltDetails)
-                                .Where(x => x.List_of_pathways != null && x.List_of_pathways.Count > 0).SelectMany(x => x.List_of_pathways).SelectMany(x => x.pathwayID()).GroupBy(x => x)
-                                .OrderByDescending(x => x.Count()).ThenBy(x => x.Key).Select(x => x.Key))
-                            {
-                                foreach (msMetabolite metabolitePerPathway in msMetaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge).ListOfMetabolites.Select(x => x.mtbltDetails))
-                                {
-                                    if (metabolitePerPathway.List_of_pathways != null && metabolitePerPathway.List_of_pathways.Count > 0 && metabolitePerPathway.List_of_pathways.Any(x => x.pathwayID().Any(y => y == currPathwayID)))
-                                    {
-                                        pairwiseTest = (publicVariables.numberOfClasses == publicVariables.numberOfClassesValues.two) ? "" : metabolitePerPathway.ListOfStats.MultiGroupPvalue.ToString() + publicVariables.breakCharInFile;
-                                        for (int i = 0; i < metabolitePerPathway.ListOfStats.PairwiseTestPvalue.Count; i++)
-                                        {
-                                            pairwiseTest += string.Format("{0}{1}{2}{1}",
-                                                metabolitePerPathway.ListOfStats.Ratio.ElementAt(i).pairValue,
-                                                publicVariables.breakCharInFile,
-                                                metabolitePerPathway.ListOfStats.PairwiseTestPvalue.ElementAt(i).pairValue);
-                                        }
-                                        pairwiseTest = pairwiseTest.Substring(0, pairwiseTest.Length - 1);
-
-                                        line_to_print = string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}{0}{14}{0}{15}{0}{16}",
-                                                        publicVariables.breakCharInFile,
-                                                        msMetaboliteLevels.List_SampleForTissueAndCharge.SelectMany(x => x.ListOfMetabolites).Select(x => x.mtbltDetails)
-                                                            .Where(x => x.List_of_pathways != null && x.List_of_pathways.Count > 0).SelectMany(x => x.List_of_pathways)
-                                                            .First(x => x.pathwayID().Any(y => y == currPathwayID)).Super_class,
-                                                        currPathwayID,
-                                                        msMetaboliteLevels.List_SampleForTissueAndCharge.SelectMany(x => x.ListOfMetabolites).Select(x => x.mtbltDetails)
-                                                            .Where(x => x.List_of_pathways != null && x.List_of_pathways.Count > 0).SelectMany(x => x.List_of_pathways)
-                                                            .First(x => x.pathwayID().Any(y => y == currPathwayID)).pathwayDetails(),
-                                                        msMetaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge).ListOfMetabolites.Select(x => x.mtbltDetails)
-                                                                    .Count(x => x.List_of_pathways.Any(y => y.pathwayID().Any(z => z == currPathwayID))),
-                                                        metabolitePerPathway.In_Name,
-                                                        metabolitePerPathway.In_Formula,
-                                                        publicVariables.prefix.ToString().ToUpper(),
-                                                        charge,
-                                                        pairwiseTest,
-                                                        metabolitePerPathway.In_Cas_id,
-                                                        metabolitePerPathway.In_Hmdb_id,
-                                                        metabolitePerPathway.In_Kegg_id,
-                                                        metabolitePerPathway.In_Chebi_id,
-                                                        metabolitePerPathway.In_Pubchem_id,
-                                                        metabolitePerPathway.In_customId,
-                                                        string.Join("|", metabolitePerPathway.List_of_proteins.Select(x => x.Gene_name))
-                                                        );
-                                        output_all.WriteLine(line_to_print);
-
-                                        //print significant only
-                                        //significant is defined as:
-                                        //Anova pvalue corrected OR not <= 0.1
-                                        //Individual t test pvalue corrected or not <= 0.1
-                                        //Ratio <= 0.5 or >=1.5
-                                        //Absolute of Pearson correlation >= 0.5
-                                        if (publicVariables.numberOfClasses == publicVariables.numberOfClassesValues.two) //if there are only two phenotypic classes
-                                        {
-                                            if (metabolitePerPathway.ListOfStats.PairwiseTestPvalue.Any(x => x.pairValue <= publicVariables.significanceThreshold) ||
-                                                metabolitePerPathway.ListOfStats.Ratio.Any(x => x.pairValue <= publicVariables.ratioLowerThreshold) ||
-                                                metabolitePerPathway.ListOfStats.Ratio.Any(x => x.pairValue >= publicVariables.ratioUpperThreshold))
-                                            {
-                                                line_to_print = string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}{0}{14}{0}{15}{0}{16}",
-                                                        publicVariables.breakCharInFile,
-                                                        msMetaboliteLevels.List_SampleForTissueAndCharge.SelectMany(x => x.ListOfMetabolites).Select(x => x.mtbltDetails)
-                                                            .Where(x => x.List_of_pathways != null && x.List_of_pathways.Count > 0).SelectMany(x => x.List_of_pathways)
-                                                            .First(x => x.pathwayID().Any(y => y == currPathwayID)).Super_class,
-                                                        currPathwayID,
-                                                        msMetaboliteLevels.List_SampleForTissueAndCharge.SelectMany(x => x.ListOfMetabolites).Select(x => x.mtbltDetails)
-                                                            .Where(x => x.List_of_pathways != null && x.List_of_pathways.Count > 0)
-                                                            .SelectMany(x => x.List_of_pathways).First(x => x.pathwayID().Any(y => y == currPathwayID)).pathwayDetails(),
-                                                        msMetaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge).ListOfMetabolites.Select(x => x.mtbltDetails)
-                                                                        .Where(x => x.List_of_pathways.Any(y => y.pathwayID().Any(z => z == currPathwayID)))
-                                                                        .Count(x => x.ListOfStats.Ratio.Any(y => y.pairValue >= publicVariables.ratioUpperThreshold) || x.ListOfStats.Ratio.Any(y => y.pairValue <= publicVariables.ratioLowerThreshold) ||
-                                                                        x.ListOfStats.MultiGroupPvalue <= publicVariables.significanceThreshold || x.ListOfStats.PairwiseTestPvalue.Any(y => y.pairValue <= publicVariables.significanceThreshold)),
-                                                        metabolitePerPathway.In_Name,
-                                                        metabolitePerPathway.In_Formula,
-                                                        publicVariables.prefix.ToString().ToUpper(),
-                                                        charge,
-                                                        pairwiseTest,
-                                                        metabolitePerPathway.In_Cas_id,
-                                                        metabolitePerPathway.In_Hmdb_id,
-                                                        metabolitePerPathway.In_Kegg_id,
-                                                        metabolitePerPathway.In_Chebi_id,
-                                                        metabolitePerPathway.In_Pubchem_id,
-                                                        metabolitePerPathway.In_customId,
-                                                        string.Join("|", metabolitePerPathway.List_of_proteins.Select(x => x.Gene_name))
-                                                        );
-                                                output_significant.WriteLine(line_to_print);
-                                            }
-                                        }
-                                        else
-                                        {
-                                            if (metabolitePerPathway.ListOfStats.MultiGroupPvalue <= publicVariables.significanceThreshold ||
-                                                metabolitePerPathway.ListOfStats.PairwiseTestPvalue.Any(x => x.pairValue <= publicVariables.significanceThreshold) ||
-                                                metabolitePerPathway.ListOfStats.Ratio.Any(x => x.pairValue <= publicVariables.ratioLowerThreshold) ||
-                                                metabolitePerPathway.ListOfStats.Ratio.Any(x => x.pairValue >= publicVariables.ratioUpperThreshold))
-                                            {
-                                                line_to_print = string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}{0}{14}{0}{15}{0}{16}",
-                                                        publicVariables.breakCharInFile,
-                                                        msMetaboliteLevels.List_SampleForTissueAndCharge.SelectMany(x => x.ListOfMetabolites).Select(x => x.mtbltDetails)
-                                                            .Where(x => x.List_of_pathways != null && x.List_of_pathways.Count > 0).SelectMany(x => x.List_of_pathways)
-                                                            .First(x => x.pathwayID().Any(y => y == currPathwayID)).Super_class,
-                                                        currPathwayID,
-                                                        msMetaboliteLevels.List_SampleForTissueAndCharge.SelectMany(x => x.ListOfMetabolites).Select(x => x.mtbltDetails)
-                                                            .Where(x => x.List_of_pathways != null && x.List_of_pathways.Count > 0)
-                                                            .SelectMany(x => x.List_of_pathways).First(x => x.pathwayID().Any(y => y == currPathwayID)).pathwayDetails(),
-                                                        msMetaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge).ListOfMetabolites.Select(x => x.mtbltDetails)
-                                                                        .Where(x => x.List_of_pathways.Any(y => y.pathwayID().Any(z => z == currPathwayID)))
-                                                                        .Count(x => x.ListOfStats.Ratio.Any(y => y.pairValue >= publicVariables.ratioUpperThreshold) || x.ListOfStats.Ratio.Any(y => y.pairValue <= publicVariables.ratioLowerThreshold) ||
-                                                                        x.ListOfStats.MultiGroupPvalue <= publicVariables.significanceThreshold || x.ListOfStats.PairwiseTestPvalue.Any(y => y.pairValue <= publicVariables.significanceThreshold)),
-                                                        metabolitePerPathway.In_Name,
-                                                        metabolitePerPathway.In_Formula,
-                                                        publicVariables.prefix.ToString().ToUpper(),
-                                                        charge,
-                                                        pairwiseTest,
-                                                        metabolitePerPathway.In_Cas_id,
-                                                        metabolitePerPathway.In_Hmdb_id,
-                                                        metabolitePerPathway.In_Kegg_id,
-                                                        metabolitePerPathway.In_Chebi_id,
-                                                        metabolitePerPathway.In_Pubchem_id,
-                                                        metabolitePerPathway.In_customId,
-                                                        string.Join("|", metabolitePerPathway.List_of_proteins.Select(x => x.Gene_name))
-                                                        );
-                                                output_significant.WriteLine(line_to_print);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            foreach (msMetabolite metaboliteWithNoPathway in msMetaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge)
-                                .ListOfMetabolites.Select(x => x.mtbltDetails).Where(x => x.List_of_pathways == null || x.List_of_pathways.Count == 0))
-                            {
-                                pairwiseTest = (publicVariables.numberOfClasses == publicVariables.numberOfClassesValues.two) ? "" : metaboliteWithNoPathway.ListOfStats.MultiGroupPvalue.ToString() + publicVariables.breakCharInFile;
-                                for (int i = 0; i < metaboliteWithNoPathway.ListOfStats.PairwiseTestPvalue.Count; i++)
-                                {
-                                    pairwiseTest += string.Format("{0}{1}{2}{1}",
-                                        metaboliteWithNoPathway.ListOfStats.Ratio.ElementAt(i).pairValue,
-                                        publicVariables.breakCharInFile,
-                                        metaboliteWithNoPathway.ListOfStats.PairwiseTestPvalue.ElementAt(i).pairValue);
-                                }
-                                pairwiseTest = pairwiseTest.Substring(0, pairwiseTest.Length - 1);
-
-                                line_to_print = string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}{0}{14}{0}{15}{0}{16}",
+                    output.WriteLine(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}{0}{14}{0}{15}{0}{16}",
                                                   publicVariables.breakCharInFile,
-                                                  "Unknown",
-                                                  "Unknown",
-                                                  "Unknown",
-                                                  "0",
-                                                  metaboliteWithNoPathway.In_Name,
-                                                  metaboliteWithNoPathway.In_Formula,
-                                                  publicVariables.prefix.ToString().ToUpper(),
-                                                  charge,
+                                                  "SuperPathway",
+                                                  "SubPathwayID",
+                                                  "SubPathway",
+                                                  "PathwayCount",
+                                                  "BiochemicalName",
+                                                  "Formula",
+                                                  "Platform",
+                                                  "Charge",
                                                   pairwiseTest,
-                                                  metaboliteWithNoPathway.In_Cas_id,
-                                                  metaboliteWithNoPathway.In_Hmdb_id,
-                                                  metaboliteWithNoPathway.In_Kegg_id,
-                                                  metaboliteWithNoPathway.In_Chebi_id,
-                                                  metaboliteWithNoPathway.In_Pubchem_id,
-                                                  metaboliteWithNoPathway.In_customId,
-                                                  string.Join("|", metaboliteWithNoPathway.List_of_proteins.Select(x => x.Gene_name))
-                                                  );
-                                output_all.WriteLine(line_to_print);
+                                                  "CAS",
+                                                  "HMDB",
+                                                  "KEGG",
+                                                  "ChEBI",
+                                                  "PubChem",
+                                                  "CustID",
+                                                  "Genes"
+                                                  ));
 
-                                //print significant only
-                                //significant is defined as:
-                                //Anova pvalue corrected OR not <= 0.1
-                                //Individual t test pvalue corrected or not <= 0.1
-                                //Ratio <= 0.5 or >=1.5
-                                //Absolute of Pearson correlation >= 0.5
-                                if (publicVariables.numberOfClasses == publicVariables.numberOfClassesValues.two) //if there are only two phenotypic classes
+                    foreach (string charge in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct())
+                    {
+                        foreach (string currPathwayID in msMetaboliteLevels.List_SampleForTissueAndCharge.SelectMany(x => x.ListOfMetabolites).Select(x => x.mtbltDetails)
+                            .Where(x => x.List_of_pathways != null && x.List_of_pathways.Count > 0).SelectMany(x => x.List_of_pathways).SelectMany(x => x.pathwayID()).GroupBy(x => x)
+                            .OrderByDescending(x => x.Count()).ThenBy(x => x.Key).Select(x => x.Key))
+                        {
+                            foreach (msMetabolite metabolitePerPathway in msMetaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge).ListOfMetabolites.Select(x => x.mtbltDetails))
+                            {
+                                if (metabolitePerPathway.List_of_pathways != null && metabolitePerPathway.List_of_pathways.Count > 0 && metabolitePerPathway.List_of_pathways.Any(x => x.pathwayID().Any(y => y == currPathwayID)))
                                 {
-                                    if (metaboliteWithNoPathway.ListOfStats.PairwiseTestPvalue.Any(x => x.pairValue <= publicVariables.significanceThreshold) ||
-                                        metaboliteWithNoPathway.ListOfStats.Ratio.Any(x => x.pairValue <= publicVariables.ratioLowerThreshold) ||
-                                        metaboliteWithNoPathway.ListOfStats.Ratio.Any(x => x.pairValue >= publicVariables.ratioUpperThreshold))
+                                    pairwiseTest = (publicVariables.numberOfClasses == publicVariables.numberOfClassesValues.two) ? "" : metabolitePerPathway.ListOfStats.MultiGroupPvalue.ToString() + publicVariables.breakCharInFile;
+                                    for (int i = 0; i < metabolitePerPathway.ListOfStats.PairwiseTestPvalue.Count; i++)
                                     {
-                                        output_significant.WriteLine(line_to_print);
+                                        pairwiseTest += string.Format("{0}{1}{2}{1}",
+                                            metabolitePerPathway.ListOfStats.Ratio.ElementAt(i).fold_change,
+                                            publicVariables.breakCharInFile,
+                                            metabolitePerPathway.ListOfStats.PairwiseTestPvalue.ElementAt(i).pairValue);
                                     }
-                                }
-                                else
-                                {
-                                    if (metaboliteWithNoPathway.ListOfStats.MultiGroupPvalue <= publicVariables.significanceThreshold || 
-                                        metaboliteWithNoPathway.ListOfStats.PairwiseTestPvalue.Any(x => x.pairValue <= publicVariables.significanceThreshold) || 
-                                        metaboliteWithNoPathway.ListOfStats.Ratio.Any(x => x.pairValue <= publicVariables.ratioLowerThreshold) || 
-                                        metaboliteWithNoPathway.ListOfStats.Ratio.Any(x => x.pairValue >= publicVariables.ratioUpperThreshold))
-                                    {
-                                        output_significant.WriteLine(line_to_print);
-                                    }
+                                    pairwiseTest = pairwiseTest.Substring(0, pairwiseTest.Length - 1);
+
+                                    output.WriteLine(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}{0}{14}{0}{15}{0}{16}",
+                                                    publicVariables.breakCharInFile,
+                                                    msMetaboliteLevels.List_SampleForTissueAndCharge.SelectMany(x => x.ListOfMetabolites).Select(x => x.mtbltDetails)
+                                                        .Where(x => x.List_of_pathways != null && x.List_of_pathways.Count > 0).SelectMany(x => x.List_of_pathways)
+                                                        .First(x => x.pathwayID().Any(y => y == currPathwayID)).Super_class,
+                                                    currPathwayID,
+                                                    msMetaboliteLevels.List_SampleForTissueAndCharge.SelectMany(x => x.ListOfMetabolites).Select(x => x.mtbltDetails)
+                                                        .Where(x => x.List_of_pathways != null && x.List_of_pathways.Count > 0).SelectMany(x => x.List_of_pathways)
+                                                        .First(x => x.pathwayID().Any(y => y == currPathwayID)).pathwayDetails(),
+                                                    msMetaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge).ListOfMetabolites.Select(x => x.mtbltDetails)
+                                                                .Count(x => x.List_of_pathways.Any(y => y.pathwayID().Any(z => z == currPathwayID))),
+                                                    metabolitePerPathway.In_Name,
+                                                    metabolitePerPathway.In_Formula,
+                                                    publicVariables.prefix.ToString().ToUpper(),
+                                                    charge,
+                                                    pairwiseTest,
+                                                    metabolitePerPathway.In_Cas_id,
+                                                    metabolitePerPathway.In_Hmdb_id,
+                                                    metabolitePerPathway.In_Kegg_id,
+                                                    metabolitePerPathway.In_Chebi_id,
+                                                    metabolitePerPathway.In_Pubchem_id,
+                                                    metabolitePerPathway.In_customId,
+                                                    string.Join("|", metabolitePerPathway.List_of_proteins.Select(x => x.Gene_name))
+                                                    ));
                                 }
                             }
+                        }
+
+                        foreach (msMetabolite metaboliteWithNoPathway in msMetaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge)
+                            .ListOfMetabolites.Select(x => x.mtbltDetails).Where(x => x.List_of_pathways == null || x.List_of_pathways.Count == 0))
+                        {
+                            pairwiseTest = (publicVariables.numberOfClasses == publicVariables.numberOfClassesValues.two) ? "" : metaboliteWithNoPathway.ListOfStats.MultiGroupPvalue.ToString() + publicVariables.breakCharInFile;
+                            for (int i = 0; i < metaboliteWithNoPathway.ListOfStats.PairwiseTestPvalue.Count; i++)
+                            {
+                                pairwiseTest += string.Format("{0}{1}{2}{1}",
+                                    metaboliteWithNoPathway.ListOfStats.Ratio.ElementAt(i).fold_change,
+                                    publicVariables.breakCharInFile,
+                                    metaboliteWithNoPathway.ListOfStats.PairwiseTestPvalue.ElementAt(i).pairValue);
+                            }
+                            pairwiseTest = pairwiseTest.Substring(0, pairwiseTest.Length - 1);
+
+                            output.WriteLine(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}{0}{14}{0}{15}{0}{16}",
+                                              publicVariables.breakCharInFile,
+                                              "Unknown",
+                                              "Unknown",
+                                              "Unknown",
+                                              "0",
+                                              metaboliteWithNoPathway.In_Name,
+                                              metaboliteWithNoPathway.In_Formula,
+                                              publicVariables.prefix.ToString().ToUpper(),
+                                              charge,
+                                              pairwiseTest,
+                                              metaboliteWithNoPathway.In_Cas_id,
+                                              metaboliteWithNoPathway.In_Hmdb_id,
+                                              metaboliteWithNoPathway.In_Kegg_id,
+                                              metaboliteWithNoPathway.In_Chebi_id,
+                                              metaboliteWithNoPathway.In_Pubchem_id,
+                                              metaboliteWithNoPathway.In_customId,
+                                              string.Join("|", metaboliteWithNoPathway.List_of_proteins.Select(x => x.Gene_name))
+                                              ));
                         }
                     }
                 }
@@ -430,107 +331,137 @@ namespace MS_targeted
 
         private static void printMetaboliteStatistics(string detailsFilePrefix)
         {
-            string line_to_print, pairwiseTest;
+            string pairwiseTest;
             foreach (string tissue in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct())
             {
-                using (TextWriter output_significant = new StreamWriter(@"" + detailsFilePrefix + "_significant_" + tissue + publicVariables.suffix))
+                using (TextWriter output = new StreamWriter(@"" + detailsFilePrefix + "_" + tissue + publicVariables.suffix))
                 {
-                    using (TextWriter output_all = new StreamWriter(@"" + detailsFilePrefix + "_" + tissue + publicVariables.suffix))
+                    pairwiseTest = (publicVariables.numberOfClasses == publicVariables.numberOfClassesValues.two) ? "" : "pVal" + publicVariables.breakCharInFile;
+                    for (int i = 0; i < msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.Count; i++)
                     {
-                        pairwiseTest = (publicVariables.numberOfClasses == publicVariables.numberOfClassesValues.two) ? "" : "pVal" + publicVariables.breakCharInFile;
-                        for (int i = 0; i < msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.Count; i++)
-                        {
-                            pairwiseTest += msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "v" +
-                                msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "r" + publicVariables.breakCharInFile +
-                                msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "v" +
-                                msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "p" + publicVariables.breakCharInFile;
-                        }
-                        pairwiseTest = pairwiseTest.Substring(0, pairwiseTest.Length - 1);
+                        pairwiseTest += msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "to" +
+                            msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "fc" + publicVariables.breakCharInFile +
+                            msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "to" +
+                            msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "ci" + publicVariables.breakCharInFile +
+                            msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "to" +
+                            msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "pv" + publicVariables.breakCharInFile;
+                    }
+                    pairwiseTest = pairwiseTest.Substring(0, pairwiseTest.Length - 1);
 
-                        line_to_print = string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}{0}{14}{0}{15}{0}{16}",
-                                                      publicVariables.breakCharInFile,
-                                                      "BiochemicalName",
-                                                      "Formula",
-                                                      "Kingdom",
-                                                      "SuperClass",
-                                                      "Class",
-                                                      "Platform",
-                                                      "Charge",
-                                                      pairwiseTest,
-                                                      "CAS",
-                                                      "HMDB",
-                                                      "KEGG",
-                                                      "ChEBI",
-                                                      "PubChem",
-                                                      "CustID",
-                                                      "Genes",
-                                                      "PathwayIDs"
-                                                      );
-                        output_significant.WriteLine(line_to_print);
-                        output_all.WriteLine(line_to_print);
-
-                        foreach (string charge in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct())
-                        {
-                            foreach (msMetabolite metabolitePerPathway in msMetaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge).ListOfMetabolites.Select(x => x.mtbltDetails))
-                            {
-                                pairwiseTest = (publicVariables.numberOfClasses == publicVariables.numberOfClassesValues.two) ? "" : metabolitePerPathway.ListOfStats.MultiGroupPvalue.ToString() + publicVariables.breakCharInFile;
-                                for (int i = 0; i < metabolitePerPathway.ListOfStats.PairwiseTestPvalue.Count; i++)
-                                {
-                                    pairwiseTest += string.Format("{1}{0}{2}{0}",
-                                        publicVariables.breakCharInFile,
-                                        metabolitePerPathway.ListOfStats.Ratio.ElementAt(i).pairValue,
-                                        metabolitePerPathway.ListOfStats.PairwiseTestPvalue.ElementAt(i).pairValue);
-                                }
-                                pairwiseTest = pairwiseTest.Substring(0, pairwiseTest.Length - 1);
-
-                                line_to_print = string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}{0}{14}{0}{15}{0}{16}",
+                    output.WriteLine(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}{0}{14}{0}{15}{0}{16}",
                                                   publicVariables.breakCharInFile,
-                                                  metabolitePerPathway.In_Name,
-                                                  metabolitePerPathway.In_Formula,
-                                                  metabolitePerPathway.My_taxonomy.Kingdom,
-                                                  metabolitePerPathway.My_taxonomy.Super_class,
-                                                  metabolitePerPathway.My_taxonomy.Tclass,
-                                                  publicVariables.prefix.ToString().ToUpper(),
-                                                  charge,
+                                                  "BiochemicalName",
+                                                  "Formula",
+                                                  "Kingdom",
+                                                  "SuperClass",
+                                                  "Class",
+                                                  "Platform",
+                                                  "Charge",
                                                   pairwiseTest,
-                                                  metabolitePerPathway.In_Cas_id,
-                                                  metabolitePerPathway.In_Hmdb_id,
-                                                  metabolitePerPathway.In_Kegg_id,
-                                                  metabolitePerPathway.In_Chebi_id,
-                                                  metabolitePerPathway.In_Pubchem_id,
-                                                  metabolitePerPathway.In_customId,
-                                                  string.Join("|", metabolitePerPathway.List_of_proteins.Select(x => x.Gene_name)),
-                                                  (metabolitePerPathway.List_of_pathways != null && metabolitePerPathway.List_of_pathways.Count > 0)
-                                                        ? string.Join("|", metabolitePerPathway.List_of_pathways.SelectMany(x => x.pathwayID()).Distinct()) : "Unknown"
-                                                  );
-                                output_all.WriteLine(line_to_print);
+                                                  "CAS",
+                                                  "HMDB",
+                                                  "KEGG",
+                                                  "ChEBI",
+                                                  "PubChem",
+                                                  "CustID",
+                                                  "Genes",
+                                                  "PathwayIDs"
+                                                  ));
 
-                                //print significant only
-                                //significant is defined as:
-                                //Anova pvalue corrected OR not <= 0.1
-                                //Individual t test pvalue corrected or not <= 0.1
-                                //Ratio <= 0.5 or >=1.5
-                                //Absolute of Pearson correlation >= 0.5
-                                if (publicVariables.numberOfClasses == publicVariables.numberOfClassesValues.two) //if there are only two phenotypic classes
-                                {
-                                    if (metabolitePerPathway.ListOfStats.PairwiseTestPvalue.Any(x => x.pairValue <= publicVariables.significanceThreshold) || 
-                                        metabolitePerPathway.ListOfStats.Ratio.Any(x => x.pairValue <= publicVariables.ratioLowerThreshold) || 
-                                        metabolitePerPathway.ListOfStats.Ratio.Any(x => x.pairValue >= publicVariables.ratioUpperThreshold))
-                                    {
-                                        output_significant.WriteLine(line_to_print);
-                                    }
-                                }
-                                else
-                                {
-                                    if (metabolitePerPathway.ListOfStats.MultiGroupPvalue <= publicVariables.significanceThreshold ||
-                                        metabolitePerPathway.ListOfStats.PairwiseTestPvalue.Any(x => x.pairValue <= publicVariables.significanceThreshold) ||
-                                        metabolitePerPathway.ListOfStats.Ratio.Any(x => x.pairValue <= publicVariables.ratioLowerThreshold) ||
-                                        metabolitePerPathway.ListOfStats.Ratio.Any(x => x.pairValue >= publicVariables.ratioUpperThreshold))
-                                    {
-                                        output_significant.WriteLine(line_to_print);
-                                    }
-                                }
+                    foreach (string charge in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct())
+                    {
+                        foreach (msMetabolite metabolitePerPathway in msMetaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge).ListOfMetabolites.Select(x => x.mtbltDetails))
+                        {
+                            pairwiseTest = (publicVariables.numberOfClasses == publicVariables.numberOfClassesValues.two) ? "" : metabolitePerPathway.ListOfStats.MultiGroupPvalue.ToString() + publicVariables.breakCharInFile;
+                            for (int i = 0; i < metabolitePerPathway.ListOfStats.PairwiseTestPvalue.Count; i++)
+                            {
+                                pairwiseTest += string.Format("{1}{0}{2}{0}{3}{0}",
+                                    publicVariables.breakCharInFile,
+                                    metabolitePerPathway.ListOfStats.Ratio.ElementAt(i).fold_change,
+                                    "[" + metabolitePerPathway.ListOfStats.Ratio.ElementAt(i).ci_lower + "," + metabolitePerPathway.ListOfStats.Ratio.ElementAt(i).ci_upper + "]",
+                                    metabolitePerPathway.ListOfStats.PairwiseTestPvalue.ElementAt(i).pairValue);
                             }
+                            pairwiseTest = pairwiseTest.Substring(0, pairwiseTest.Length - 1);
+
+                            output.WriteLine(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}{0}{14}{0}{15}{0}{16}",
+                                              publicVariables.breakCharInFile,
+                                              metabolitePerPathway.In_AZmNameFixed,
+                                              metabolitePerPathway.In_Formula,
+                                              metabolitePerPathway.My_taxonomy.Kingdom,
+                                              metabolitePerPathway.My_taxonomy.Super_class,
+                                              metabolitePerPathway.My_taxonomy.Tclass,
+                                              publicVariables.prefix.ToString().ToUpper(),
+                                              charge,
+                                              pairwiseTest,
+                                              metabolitePerPathway.In_Cas_id,
+                                              metabolitePerPathway.In_Hmdb_id,
+                                              metabolitePerPathway.In_Kegg_id,
+                                              metabolitePerPathway.In_Chebi_id,
+                                              metabolitePerPathway.In_Pubchem_id,
+                                              metabolitePerPathway.In_customId,
+                                              string.Join("|", metabolitePerPathway.List_of_proteins.Select(x => x.Gene_name)),
+                                              (metabolitePerPathway.List_of_pathways != null && metabolitePerPathway.List_of_pathways.Count > 0)
+                                                    ? string.Join("|", metabolitePerPathway.List_of_pathways.SelectMany(x => x.pathwayID()).Distinct()) : "Unknown"
+                                              ));
+                        }
+                    }
+                }
+            }
+        }
+
+        private static void printMetaboliteRegressionStatistics(string detailsFilePrefix)
+        {
+            foreach (string tissue in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct())
+            {
+                using (TextWriter output = new StreamWriter(@"" + detailsFilePrefix + "_" + tissue + publicVariables.suffix))
+                {
+                    output.WriteLine(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}{0}{14}{0}{15}{0}{16}",
+                                                  publicVariables.breakCharInFile,
+                                                  "BiochemicalName",
+                                                  "Formula",
+                                                  "Kingdom",
+                                                  "SuperClass",
+                                                  "Class",
+                                                  "Platform",
+                                                  "Charge",
+                                                  string.Join(publicVariables.breakCharInFile.ToString(), 
+                                                    msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.RegressionValues.Select(x => x.clinical_data_name +
+                                                        "_pv" + publicVariables.breakCharInFile.ToString() + x.clinical_data_name + "_r2adjust")),
+                                                  "CAS",
+                                                  "HMDB",
+                                                  "KEGG",
+                                                  "ChEBI",
+                                                  "PubChem",
+                                                  "CustID",
+                                                  "Genes",
+                                                  "PathwayIDs"
+                                                  ));
+
+                    foreach (string charge in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct())
+                    {
+                        foreach (msMetabolite metabolitePerPathway in msMetaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge).ListOfMetabolites.Select(x => x.mtbltDetails))
+                        {
+                            output.WriteLine(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}{0}{14}{0}{15}{0}{16}",
+                                              publicVariables.breakCharInFile,
+                                              metabolitePerPathway.In_AZmNameFixed,
+                                              metabolitePerPathway.In_Formula,
+                                              metabolitePerPathway.My_taxonomy.Kingdom,
+                                              metabolitePerPathway.My_taxonomy.Super_class,
+                                              metabolitePerPathway.My_taxonomy.Tclass,
+                                              publicVariables.prefix.ToString().ToUpper(),
+                                              charge,
+                                              string.Join(publicVariables.breakCharInFile.ToString(), metabolitePerPathway.ListOfStats.RegressionValues.Select(x => x.regrPvalue.ToString() +
+                                                publicVariables.breakCharInFile.ToString() + x.regrAdjRsquare.ToString())),
+                                              metabolitePerPathway.In_Cas_id,
+                                              metabolitePerPathway.In_Hmdb_id,
+                                              metabolitePerPathway.In_Kegg_id,
+                                              metabolitePerPathway.In_Chebi_id,
+                                              metabolitePerPathway.In_Pubchem_id,
+                                              metabolitePerPathway.In_customId,
+                                              string.Join("|", metabolitePerPathway.List_of_proteins.Select(x => x.Gene_name)),
+                                              (metabolitePerPathway.List_of_pathways != null && metabolitePerPathway.List_of_pathways.Count > 0)
+                                                    ? string.Join("|", metabolitePerPathway.List_of_pathways.SelectMany(x => x.pathwayID()).Distinct()) : "Unknown"
+                                              ));
                         }
                     }
                 }
@@ -541,9 +472,9 @@ namespace MS_targeted
         {
             foreach (string tissue in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct())
             {
-                using (TextWriter output_all = new StreamWriter(@"" + corrsCovsFilePrefix + "_" + tissue + publicVariables.suffix))
+                using (TextWriter output = new StreamWriter(@"" + corrsCovsFilePrefix + "_" + tissue + publicVariables.suffix))
                 {
-                    output_all.WriteLine(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}",
+                    output.WriteLine(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}",
                         publicVariables.breakCharInFile,
                         "BiochemicalName",
                         "Formula",
@@ -564,7 +495,7 @@ namespace MS_targeted
                     {
                         foreach (msMetabolite mtbl in msMetaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge).ListOfMetabolites.Select(x => x.mtbltDetails))
                         {
-                            output_all.WriteLine(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}",
+                            output.WriteLine(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}",
                                 publicVariables.breakCharInFile,
                                 mtbl.In_Name,
                                 mtbl.In_Formula,
@@ -879,11 +810,11 @@ namespace MS_targeted
                 Dictionary<string, Dictionary<string, int>> discToNumDict = new Dictionary<string, Dictionary<string, int>>();
                 discToNumDict.Add("CurrPhenotype", new Dictionary<string, int>());
                 int phenoCnt = 0;
-                foreach (string cp in clinicalDataForSamples.List_clinicalDataForSamples.Select(x => x.Phenotype).Distinct().OrderBy(x => x))
+                foreach (string cp in clinicalData.List_clinicalData.Select(x => x.Phenotype).Distinct().OrderBy(x => x))
                 {
                     discToNumDict["CurrPhenotype"].Add(cp, phenoCnt++);
                 }
-                foreach (var discToNumPenos in clinicalDataForSamples.List_clinicalDataForSamples.SelectMany(x => x.OtherPhenotypes))
+                foreach (var discToNumPenos in clinicalData.List_clinicalData.SelectMany(x => x.Categorical_covariates))
                 {
                     if (discToNumDict.ContainsKey(discToNumPenos.Key))
                     {
@@ -901,28 +832,28 @@ namespace MS_targeted
                 //Header
                 output.WriteLine(string.Format("{0}{1}{0}{2}{0}{3}{0}{4}{0}{5}",
                     publicVariables.breakCharInFile.ToString(),
-                    string.Join(publicVariables.breakCharInFile.ToString(), clinicalDataForSamples.List_clinicalDataForSamples.First().NormalizationVars.Select(x => x.Key).OrderBy(x => x)),
-                    string.Join(publicVariables.breakCharInFile.ToString(), clinicalDataForSamples.List_clinicalDataForSamples.First().OtherPhenotypes.Select(x => x.Key).OrderBy(x => x)),
-                    string.Join(publicVariables.breakCharInFile.ToString(), clinicalDataForSamples.List_clinicalDataForSamples.OrderBy(x => x.TissueChargeWeightProblematic.Count).Last().TissueChargeWeightProblematic.Select(x => x.tissue + "_" + x.charge).OrderBy(x => x)),
+                    string.Join(publicVariables.breakCharInFile.ToString(), clinicalData.List_clinicalData.First().Numerical_covariates.Select(x => x.Key).OrderBy(x => x)),
+                    string.Join(publicVariables.breakCharInFile.ToString(), clinicalData.List_clinicalData.First().Categorical_covariates.Select(x => x.Key).OrderBy(x => x)),
+                    string.Join(publicVariables.breakCharInFile.ToString(), clinicalData.List_clinicalData.OrderBy(x => x.SampleWeight_covariates.Count).Last().SampleWeight_covariates.Select(x => x.tissue + "_" + x.charge).OrderBy(x => x)),
                     "Phenotype", "Phenotype" + publicVariables.numberOfClasses));
 
                 string line_to_print;
-                foreach (clinicalDataForSample cdfs in clinicalDataForSamples.List_clinicalDataForSamples.OrderBy(x => x.Id))
+                foreach (clinicalDataFS cdfs in clinicalData.List_clinicalData.OrderBy(x => x.Id))
                 {
                     line_to_print = cdfs.Id;
-                    foreach (KeyValuePair<string, imputedValues> nv in cdfs.NormalizationVars.OrderBy(x => x.Key))
+                    foreach (KeyValuePair<string, imputedValues> nv in cdfs.Numerical_covariates.OrderBy(x => x.Key))
                     {
                         line_to_print += publicVariables.breakCharInFile.ToString() + nv.Value.Imputed;
                     }
-                    foreach (KeyValuePair<string, string> op in cdfs.OtherPhenotypes.OrderBy(x => x.Key))
+                    foreach (KeyValuePair<string, string> op in cdfs.Categorical_covariates.OrderBy(x => x.Key))
                     {
                         line_to_print += publicVariables.breakCharInFile.ToString() + discToNumDict[op.Key][op.Value];
                     }
-                    foreach (clinicalDataForSample.sampleWeight sw in clinicalDataForSamples.List_clinicalDataForSamples.OrderBy(x => x.TissueChargeWeightProblematic.Count).Last().TissueChargeWeightProblematic)
+                    foreach (clinicalDataFS.sampleWeight sw in clinicalData.List_clinicalData.OrderBy(x => x.SampleWeight_covariates.Count).Last().SampleWeight_covariates)
                     {
-                        if (cdfs.TissueChargeWeightProblematic.Any(x => x.tissue == sw.tissue && x.charge == sw.charge))
+                        if (cdfs.SampleWeight_covariates.Any(x => x.tissue == sw.tissue && x.charge == sw.charge))
                         {
-                            line_to_print += publicVariables.breakCharInFile.ToString() + cdfs.TissueChargeWeightProblematic.First(x => x.tissue == sw.tissue && x.charge == sw.charge).weight;
+                            line_to_print += publicVariables.breakCharInFile.ToString() + cdfs.SampleWeight_covariates.First(x => x.tissue == sw.tissue && x.charge == sw.charge).weight;
                         }
                         else
                         {

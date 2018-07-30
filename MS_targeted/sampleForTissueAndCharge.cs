@@ -18,16 +18,18 @@ namespace MS_targeted
             Id = _metabolitebVals.First();
             Tissue = _metabolitebVals.ElementAt(1);
             Charge = _metabolitebVals.ElementAt(2);
-            Phenotype = (clinicalDataForSamples.List_clinicalDataForSamples.Any(x => x.Id == Id)) ? clinicalDataForSamples.List_clinicalDataForSamples.First(x => x.Id == Id).Phenotype : "U";
+            Phenotype = (clinicalData.List_clinicalData.Any(x => x.Id == Id)) ? clinicalData.List_clinicalData.First(x => x.Id == Id).Phenotype : "U";
 
             ListOfNumClinicalData = new List<numClinicalData>();
             ListOfNumClinicalData.Add(new numClinicalData()
             {
-                name = "sampleWeight",
-                value = ((publicVariables.prefixValues.mixed == publicVariables.prefix) ? clinicalDataForSamples.List_clinicalDataForSamples.First(x => x.Id == Id).TissueChargeWeightProblematic.First(x => x.tissue.ToLower() == Tissue.ToLower()).weight
-                    : clinicalDataForSamples.List_clinicalDataForSamples.First(x => x.Id == Id).TissueChargeWeightProblematic.First(x => x.tissue.ToLower() == Tissue.ToLower() && x.charge.ToLower() == Charge.ToLower()).weight)
+                name = "sampleweight",
+                value = ((publicVariables.prefixValues.mixed == publicVariables.prefix || publicVariables.prefixValues.gcms == publicVariables.prefix) 
+                    ? clinicalData.List_clinicalData.First(x => x.Id == Id).SampleWeight_covariates.Where(x => x.tissue.ToLower() == Tissue.ToLower()).Average(x => x.weight)
+                        : clinicalData.List_clinicalData.First(x => x.Id == Id).SampleWeight_covariates
+                            .First(x => x.tissue.ToLower() == Tissue.ToLower() && x.charge.ToLower() == Charge.ToLower()).weight)
             });
-            foreach (KeyValuePair<string, imputedValues> kvp_nv in clinicalDataForSamples.List_clinicalDataForSamples.First(x => x.Id == Id).NormalizationVars)
+            foreach (KeyValuePair<string, imputedValues> kvp_nv in clinicalData.List_clinicalData.First(x => x.Id == Id).Numerical_covariates)
             {
                 ListOfNumClinicalData.Add(new numClinicalData()
                 {

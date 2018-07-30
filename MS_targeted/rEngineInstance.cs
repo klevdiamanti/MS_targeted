@@ -72,6 +72,34 @@ namespace MS_targeted
                             axis.ticks = element_blank());
                     return (p);
                 };");
+
+            //calculate fold change
+            engine.Evaluate(
+                @"fold_change <- function(x, y, confidence.level=90, var.equal=F) {
+                    fc.interval(length(x), mean(x), var(x), length(y), mean(y), var(y), confidence.level, var.equal)
+                };");
+
+            //calculate fc.interval
+            engine.Evaluate(
+                @"fc.interval <- function(x.n, x.mu, x.var, y.n, y.mu, y.var, confidence.level=90, var.equal=F) {
+                    mu <- x.mu - y.mu
+                    if (var.equal) {
+                        nu <- x.n + y.n - 2
+                        se <- sqrt(((x.n-1)*x.var + (y.n-1)*y.var) / nu) * sqrt(1/x.n + 1/y.n)
+                    } else {
+                        nu <- (x.var/x.n + y.var/y.n)^2 / (x.var^2/x.n^2/(x.n-1) + y.var^2/y.n^2/(y.n-1))
+                        se <- sqrt(x.var/x.n + y.var/y.n)
+                    }
+                    t <- -qt((1-confidence.level/100)/2, df=nu)
+                    if (mu >= 0) {
+                        mu.lower <- max(0, mu - t*se)
+                        mu.upper <- mu + t*se
+                    } else {
+                        mu.lower <- min(0, mu + t*se)
+                        mu.upper <- mu - t*se
+                    }
+                    data.frame(fc=mu, df=nu, lower=mu.lower, upper=mu.upper)
+                };");
         }
 
         public static void disposeREngine()

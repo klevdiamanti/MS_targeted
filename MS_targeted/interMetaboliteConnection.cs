@@ -1,4 +1,6 @@
 ﻿
+using System.Collections.Generic;
+
 namespace MS_targeted
 {
     public class interMetaboliteConnection
@@ -13,5 +15,21 @@ namespace MS_targeted
         public string Group1 { get; set; }
         public string Group2 { get; set; }
         public double PValue { get; set; }
+        public List<perSampleRatio> ListOfPerSampleRatios { get; set; }
+
+        public void fillInListOfPerSampleRatios(List<string> sid, List<double> r)
+        {
+            ListOfPerSampleRatios = new List<perSampleRatio>();
+            for (int i = 0; i < sid.Count; i++)
+            {
+                ListOfPerSampleRatios.Add(new perSampleRatio() { sampleID = sid[i], ratio = r[i] });
+            }
+        }
+
+        public class perSampleRatio
+        {
+            public string sampleID { get; set; }
+            public double ratio { get; set; }
+        }
     }
 }

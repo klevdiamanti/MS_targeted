@@ -638,11 +638,21 @@ namespace MS_targeted
             public string Tissue { get; set; }
             public string Charge { get; set; }
 
-            public List<pairwiseTestValues> Ratio { get; set; }
+            public List<pairwiseRatioValues> Ratio { get; set; }
             public double MultiGroupPvalue { get; set; }
+            public List<regressValues> RegressionValues { get; set; }
             public List<pairwiseTestValues> PairwiseTestPvalue { get; set; }
             public List<corrVars> CorrelationValues { get; set; }
             public List<corrMetabs> CorrelationMetabolites { get; set; }
+
+            public class pairwiseRatioValues
+            {
+                public string group1 { get; set; }
+                public string group2 { get; set; }
+                public double fold_change { get; set; }
+                public double ci_lower { get; set; }
+                public double ci_upper { get; set; }
+            }
 
             public class pairwiseTestValues
             {
@@ -665,6 +675,13 @@ namespace MS_targeted
                 public double corr_value { get; set; }
                 public double pValueAdjust { get; set; }
                 public double pValueUnadjust { get; set; }
+            }
+
+            public class regressValues
+            {
+                public string clinical_data_name { get; set; }
+                public double regrPvalue { get; set; }
+                public double regrAdjRsquare { get; set; }
             }
         }
     }

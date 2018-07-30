@@ -26,12 +26,7 @@ namespace MS_targeted
                 Console.WriteLine("\toutput directory");
                 Console.WriteLine("prefix (string)");
                 Console.WriteLine("\tprefix of the files in the input directory. Also used to denote the type of analysis that has been performed.");
-                Console.WriteLine("\tSuggested that as prefix we use lcms or gcms so that we make the task easier.");
-                Console.WriteLine("donors_source (string)");
-                Console.WriteLine("\tsource where the samples have been received from. Used to denote the clinical data type of file that is to be read.");
-                Console.WriteLine("\tIt should be exodiab or patients.");
-                Console.WriteLine("number_of_classes (integer)");
-                Console.WriteLine("\tnumber of phenotype classes to run for the analysis on.");
+                Console.WriteLine("\tSuggested that as prefix we use lcms, gcms or mixed so that we make the task easier.");
                 Console.WriteLine();
                 Console.WriteLine("Comment:");
                 Console.WriteLine("\tThe data should be normalized prior to running this program!");
@@ -47,8 +42,6 @@ namespace MS_targeted
             publicVariables.databaseFile = args[2];
             publicVariables.outputDir = args[3];
             publicVariables.setPrefix(args[4]);
-            publicVariables.setDonorSource(args[5]);
-            publicVariables.setNumberOfClasses(args[6]);
 
             //set other public variables that depend on the input arguments
             publicVariables.setOtherVariables();
@@ -57,7 +50,11 @@ namespace MS_targeted
             metabolites.Read_metaboliteDatabaseFromFile(publicVariables.databaseFile);
 
             outputToLog.WriteLine("reading the tab-separated-values metadata file for the patients");
-            clinicalDataForSamples.Read_ClinicalDataForSamples();
+            clinicalData.Read_ClinicalDataForSamples();
+
+            //set number of phenotypic classes
+            outputToLog.WriteLine("setting number of classes");
+            publicVariables.setNumberOfClasses();
 
             //read the compiled csv files
             outputToLog.WriteLine("reading the compiled csv files");

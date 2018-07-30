@@ -52,9 +52,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="clinicalDataForSample.cs" />
-    <Compile Include="clinicalDataForSamples.cs" />
+    <Compile Include="clinicalData.cs" />
+    <Compile Include="clinicalDataFS.cs" />
     <Compile Include="correlations.R.cs" />
+    <Compile Include="foldChangeCI.R.cs" />
     <Compile Include="imputedValues.cs" />
     <Compile Include="interMetaboliteConnection.cs" />
     <Compile Include="interMetaboliteConnections.cs" />

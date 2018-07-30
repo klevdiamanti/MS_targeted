@@ -176,14 +176,14 @@ namespace MS_targeted
         private static void calculateRatiosOfMetabolitesForEachSample()
         {
             List<string> phenotypes = List_SampleForTissueAndCharge.Select(x => x.Phenotype).Distinct().Where(x => !publicVariables.excludedPhenotypes.Contains(x)).OrderBy(x => x).ToList();
-            List<Tuple<string, string, string, string, string, double>> tmpListOfPerSampleRatios; //ID nominator, charge nominator, ID denominator, charge denominator, phenotype, ratio
+            List<tmpPerSampleRatios> tmpListOfPerSampleRatios; //ID nominator, charge nominator, ID denominator, charge denominator, phenotype, ratio
             foreach (string tissue in List_SampleForTissueAndCharge.Select(x => x.Tissue).OrderBy(x => x).Distinct())
             {
                 //calculate per sample ratios and store them in a list of tuples that contains
                 //custom ID nominator, charge nominator, custom ID denominator, charge denominator, phenotype, ratio
                 //charges for nominator and denominator are used for cases such as LCMS where we need to check the ratio for metabolites that come
                 //from different charges
-                tmpListOfPerSampleRatios = new List<Tuple<string, string, string, string, string, double>>();
+                tmpListOfPerSampleRatios = new List<tmpPerSampleRatios>();
                 foreach (string sampleID in List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue).Select(x => x.Id).Distinct())
                 {
                     foreach (string charge_nom in List_SampleForTissueAndCharge.Select(x => x.Charge).OrderBy(x => x).Distinct())
@@ -196,12 +196,19 @@ namespace MS_targeted
                                 foreach (string cid_denom in List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge_denom && x.Id == sampleID)
                                                                                         .SelectMany(x => x.ListOfMetabolites).Select(x => x.mtbltDetails.In_customId).Distinct())
                                 {
-                                    tmpListOfPerSampleRatios.Add(new Tuple<string, string, string, string, string, double>(cid_nom, charge_nom, cid_denom, charge_denom,
-                                        List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge_nom && x.Id == sampleID).Phenotype,
-                                        List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge_nom && x.Id == sampleID).ListOfMetabolites
+                                    tmpListOfPerSampleRatios.Add(new tmpPerSampleRatios
+                                    {
+                                        sampleID = sampleID,
+                                        cid_nom = cid_nom,
+                                        charge_nom = charge_nom,
+                                        cid_denom = cid_denom,
+                                        charge_denom = charge_denom,
+                                        phenotype = List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge_nom && x.Id == sampleID).Phenotype,
+                                        ratio = List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge_nom && x.Id == sampleID).ListOfMetabolites
                                                 .First(x => x.mtbltDetails.In_customId == cid_nom).mtbltVals.Imputed /
                                         List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge_denom && x.Id == sampleID).ListOfMetabolites
-                                                .First(x => x.mtbltDetails.In_customId == cid_denom).mtbltVals.Imputed));
+                                                .First(x => x.mtbltDetails.In_customId == cid_denom).mtbltVals.Imputed
+                                    });
                                 }
                             }
                         }
@@ -226,10 +233,10 @@ namespace MS_targeted
                                         permutationTest.returnIEnurable(new List<string>() { phenotypes.ElementAt(i), phenotypes.ElementAt(j) },
                                             new List<double[]>()
                                             {
-                                                tmpListOfPerSampleRatios.Where(x => x.Item1 == cid_nom && x.Item2 == charge_nom && x.Item3 == cid_denom && x.Item4 == charge_denom && x.Item5 ==  phenotypes.ElementAt(i))
-                                                    .Select(x => x.Item6).ToArray(),
-                                                tmpListOfPerSampleRatios.Where(x => x.Item1 == cid_nom && x.Item2 == charge_nom && x.Item3 == cid_denom && x.Item4 == charge_denom && x.Item5 ==  phenotypes.ElementAt(j))
-                                                    .Select(x => x.Item6).ToArray(),
+                                                tmpListOfPerSampleRatios.Where(x => x.cid_nom == cid_nom && x.charge_nom == charge_nom && x.cid_denom == cid_denom && x.charge_denom == charge_denom && x.phenotype ==  phenotypes.ElementAt(i))
+                                                    .Select(x => x.ratio).ToArray(),
+                                                tmpListOfPerSampleRatios.Where(x => x.cid_nom == cid_nom && x.charge_nom == charge_nom && x.cid_denom == cid_denom && x.charge_denom == charge_denom && x.phenotype ==  phenotypes.ElementAt(j))
+                                                    .Select(x => x.ratio).ToArray(),
                                             });
                                         interMetaboliteConnections.ListOfInterMetaboliteConnections.Add(new interMetaboliteConnection()
                                         {
@@ -250,6 +257,9 @@ namespace MS_targeted
                                             Group2 = phenotypes.ElementAt(j),
                                             PValue = permutationTest.wilcoxonMannWhitneyPermutationTest(new string[] { "Phenotype", "Ratio" })
                                         });
+                                        interMetaboliteConnections.ListOfInterMetaboliteConnections.Last().fillInListOfPerSampleRatios(tmpListOfPerSampleRatios.Where(x => x.cid_nom == cid_nom && x.charge_nom == charge_nom && x.cid_denom == cid_denom && x.charge_denom == charge_denom && (x.phenotype == phenotypes.ElementAt(i) || x.phenotype == phenotypes.ElementAt(j)))
+                                                    .Select(x => x.sampleID).ToList(), tmpListOfPerSampleRatios.Where(x => x.cid_nom == cid_nom && x.charge_nom == charge_nom && x.cid_denom == cid_denom && x.charge_denom == charge_denom && (x.phenotype == phenotypes.ElementAt(i) || x.phenotype == phenotypes.ElementAt(j)))
+                                                    .Select(x => x.ratio).ToList());
                                     }
                                 }
                             }
@@ -271,10 +281,15 @@ namespace MS_targeted
             //ANOVA and t-test methods require arrays
             List<double[]> metabolite_values;
 
+            //create list of arrays for imputed and non-imputed values
+            //we need these lists to compute p-values
+            //ANOVA and t-test methods require arrays
+            List<normalizationVals> listOfNormValues;
+
             //create two list of tuples for imputed and non-imputed values
             //we need these lists to compute ratios between average values of pairs of phenotypes
             //in each tuple we store the two phenotypes between which the ratio was computed and the ratio value
-            List<msMetabolite.stats.pairwiseTestValues> ratio;
+            List<msMetabolite.stats.pairwiseRatioValues> ratio;
 
             //create two list of tuples for imputed and non-imputed values
             //we need these lists to store the ANOVA or t-test p-values for all phenotypes or for pairs of phenotypes
@@ -283,6 +298,7 @@ namespace MS_targeted
 
             //keep the anova p-values in these variable to avoid recalculating them for each patient
             double multiGroupTestPvalue = -1;
+            List<msMetabolite.stats.regressValues> regressionVals;
 
             //headers for the permutationTest dataframe
             string[] phenotypeColumnNames;
@@ -308,22 +324,56 @@ namespace MS_targeted
                     {
                         //initialize the lists and arrays
                         metabolite_values = new List<double[]>();
-                        ratio = new List<msMetabolite.stats.pairwiseTestValues>();
+                        listOfNormValues = new List<normalizationVals>();
+                        ratio = new List<msMetabolite.stats.pairwiseRatioValues>();
                         statTestPvalue = new List<msMetabolite.stats.pairwiseTestValues>();
                         phenotypeColumnNames = new string[] { "Phenotype", custid };
                         correlationToCovariatesVals = new List<msMetabolite.stats.corrVars>();
+                        regressionVals = new List<msMetabolite.stats.regressValues>();
 
-                        //loop over the phenotypes
-                        //minVal: the minimum value for each phenotype
-                        //minVal plays a complementary role here in order to avoid the imputed_values code line to be over-complicated
-                        //imputed_values: use minVal to impute the missing values for the given phenotype
-                        //non_imputed_values: keep only metabolites with no missing values
-                        //each of the two lists contains as many arrays as the phenotypes
+                        //loop over the phenotypes to keep info for numerical covariates for which we need to compute regressions
                         //each of the arrays contains as many elements as there are for each phenotype
                         foreach (string pheno in phenotypes)
                         {
-                            metabolite_values.Add(List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge && x.Phenotype == pheno)
-                                               .SelectMany(x => x.ListOfMetabolites).Where(x => x.mtbltDetails.In_customId == custid).Select(x => x.mtbltVals.Imputed).ToArray());
+                            double[] tmpArrayMetabVal = new double[List_SampleForTissueAndCharge.Count(x => x.Tissue == tissue && x.Charge == charge && x.Phenotype == pheno)];
+                            int i = 0;
+                            foreach (string sampleId in List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge && x.Phenotype == pheno).Select(x => x.Id))
+                            {
+                                tmpArrayMetabVal[i] = List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge && x.Phenotype == pheno && x.Id == sampleId)
+                                    .ListOfMetabolites.First(x => x.mtbltDetails.In_customId == custid).mtbltVals.Imputed;
+                                foreach (string ncv in publicVariables.normCovars)
+                                {
+                                    if (listOfNormValues.Any(x => x.covarName == ncv))
+                                    {
+                                        if (listOfNormValues.First(x => x.covarName == ncv).listOfVals.ContainsKey(pheno))
+                                        {
+                                            listOfNormValues.First(x => x.covarName == ncv).listOfVals[pheno]
+                                                .Add(List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge && x.Phenotype == pheno && x.Id == sampleId).ListOfNumClinicalData.First(x => x.name == ncv).value);
+                                        }
+                                        else
+                                        {
+                                            listOfNormValues.First(x => x.covarName == ncv).listOfVals.Add(pheno,
+                                                    new List<double>() { List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge && x.Phenotype == pheno && x.Id == sampleId).ListOfNumClinicalData.First(x => x.name == ncv).value });
+                                        }
+                                    }
+                                    else
+                                    {
+                                        listOfNormValues.Add(new normalizationVals()
+                                        {
+                                            covarName = ncv,
+                                            listOfVals = new Dictionary<string, List<double>>()
+                                            {
+                                                {
+                                                    pheno,
+                                                    new List<double>(){ List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge && x.Phenotype == pheno && x.Id == sampleId).ListOfNumClinicalData.First(x => x.name == ncv).value }
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                                i++;
+                            }
+                            metabolite_values.Add(tmpArrayMetabVal);
                         }
 
                         //loop over the phenotypes in order to get each pair of phenotype
@@ -334,12 +384,16 @@ namespace MS_targeted
                         {
                             for (int j = i + 1; j < phenotypes.Count; j++)
                             {
-                                ratio.Add(new msMetabolite.stats.pairwiseTestValues()
+                                returnFCandCI rfcaci = foldChangeCI.calculateFoldChangeAndCI(metabolite_values.ElementAt(j), metabolite_values.ElementAt(i));
+                                ratio.Add(new msMetabolite.stats.pairwiseRatioValues()
                                 {
                                     group1 = phenotypes.ElementAt(i),
                                     group2 = phenotypes.ElementAt(j),
-                                    pairValue = Math.Abs(metabolite_values.ElementAt(j).Average() / metabolite_values.ElementAt(i).Average())
+                                    fold_change = rfcaci.fc,
+                                    ci_lower = rfcaci.lower,
+                                    ci_upper = rfcaci.upper
                                 });
+
                                 permutationTest.returnIEnurable(new List<string>() { phenotypes.ElementAt(i), phenotypes.ElementAt(j) }, new List<double[]>() { metabolite_values.ElementAt(i), metabolite_values.ElementAt(j) });
                                 statTestPvalue.Add(new msMetabolite.stats.pairwiseTestValues()
                                 {
@@ -350,9 +404,23 @@ namespace MS_targeted
                             }
                         }
 
-                        //calculate the multi-group p-values
+                        //calculate the two-group or multi-group p-values
                         permutationTest.returnIEnurable(phenotypes, metabolite_values);
-                        multiGroupTestPvalue = permutationTest.kruskalWallisPermutationTest(phenotypeColumnNames);
+                        if (publicVariables.numberOfClasses == publicVariables.numberOfClassesValues.two)
+                        {
+                            multiGroupTestPvalue = permutationTest.wilcoxonMannWhitneyPermutationTest(phenotypeColumnNames);
+                        }
+                        else
+                        {
+                            multiGroupTestPvalue = permutationTest.kruskalWallisPermutationTest(phenotypeColumnNames);
+                        }
+
+                        //linear regression model between metabolite levels and HbA1c
+                        foreach (normalizationVals nv in listOfNormValues)
+                        {
+                            permutationTest.returnIEnurableNumeric(nv.listOfVals.Select(x => x.Value.ToArray()).ToList(), metabolite_values);
+                            regressionVals.Add(permutationTest.linearRegressionTest(new string[] { nv.covarName, custid }));
+                        }
 
                         //calculate spearman correlations
                         correlationToCovariatesVals = correlations.correlateMetabsToCovariates(tissue, charge, custid, clinicalDataNames);
@@ -364,6 +432,7 @@ namespace MS_targeted
                                 Tissue = sftac.Tissue,
                                 Charge = sftac.Charge,
                                 MultiGroupPvalue = multiGroupTestPvalue,
+                                RegressionValues = regressionVals,
                                 Ratio = ratio,
                                 PairwiseTestPvalue = statTestPvalue,
                                 CorrelationValues = correlationToCovariatesVals,
@@ -375,5 +444,22 @@ namespace MS_targeted
                 }
             }
         }
+
+        private class normalizationVals
+        {
+            public Dictionary<string, List<double>> listOfVals;
+            public string covarName;
+        }
+    }
+
+    public class tmpPerSampleRatios
+    {
+        public string sampleID { get; set; }
+        public string cid_nom { get; set; }
+        public string charge_nom { get; set; }
+        public string cid_denom { get; set; }
+        public string charge_denom { get; set; }
+        public string phenotype { get; set; }
+        public double ratio { get; set; }
     }
 }
