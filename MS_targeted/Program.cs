@@ -10,26 +10,24 @@ namespace MS_targeted
         {
             if (args.Length == 0)
             {
-                Console.WriteLine("[mono] MS_targeted.exe dir_with_input_files clinical_data_file combined_db_file output_dir prefix donors_source number_of_classes");
+                Console.WriteLine("[mono] MS_targeted.exe dir_with_input_files clinical_data_file combined_db_file output_dir prefix");
                 Console.WriteLine();
                 Console.WriteLine("This script performs the full analysis of the LC/GCMS data for p-values, correlations, ratios, pathways, database output and ROSETTA datasets.");
                 Console.WriteLine();
                 Console.WriteLine("Input:");
-                Console.WriteLine("dir_with_raw_tsv_files (string)");
-                Console.WriteLine("\tdirectory containing a collection of tab or comma separated files with the metabolite values (sample file attached)");
-                Console.WriteLine("\tthese filenames should all start with a predefined prefix");
+                Console.WriteLine("dir_with_input_files (string)");
+                Console.WriteLine("\tdirectory containing a collection of tab or comma separated files with the metabolite values");
+                Console.WriteLine("\tthese files should be tab seprated, should all start with the same prefix and have the same suffix");
+                Console.WriteLine("\tthe metabolites values should be normalized prior to running this pipeline");
                 Console.WriteLine("clinical_data_file (string)");
                 Console.WriteLine("\tfile containing a collection of tab or comma separated values of clinical data for each donor");
                 Console.WriteLine("combined_db_file (string)");
-                Console.WriteLine("\ta tab-separated file containing all the information for pathways, IDs etc. Should be the output from compileMetaboliteDB.exe");
+                Console.WriteLine("\ta tab-separated file containing all the information for pathways, IDs etc. Should be the output from metabolomicsDB.exe");
                 Console.WriteLine("output_dir (string)");
                 Console.WriteLine("\toutput directory");
                 Console.WriteLine("prefix (string)");
-                Console.WriteLine("\tprefix of the files in the input directory. Also used to denote the type of analysis that has been performed.");
-                Console.WriteLine("\tSuggested that as prefix we use lcms, gcms or mixed so that we make the task easier.");
-                Console.WriteLine();
-                Console.WriteLine("Comment:");
-                Console.WriteLine("\tThe data should be normalized prior to running this program!");
+                Console.WriteLine("\tprefix of the files in the input directory.");
+                Console.WriteLine("\tsuggested that as prefix we use lcms, gcms or mixed so that we make the task easier.");
                 Environment.Exit(0);
             }
 
@@ -46,10 +44,10 @@ namespace MS_targeted
             //set other public variables that depend on the input arguments
             publicVariables.setOtherVariables();
 
-            outputToLog.WriteLine("reading the tab-separated-values metabolite database file");
+            outputToLog.WriteLine("reading the tab-separated metabolite database file");
             metabolites.Read_metaboliteDatabaseFromFile(publicVariables.databaseFile);
 
-            outputToLog.WriteLine("reading the tab-separated-values metadata file for the patients");
+            outputToLog.WriteLine("reading the tab-separated metadata file for the patients");
             clinicalData.Read_ClinicalDataForSamples();
 
             //set number of phenotypic classes
@@ -58,11 +56,15 @@ namespace MS_targeted
 
             //read the compiled csv files
             outputToLog.WriteLine("reading the compiled csv files");
-            msMetaboliteLevels.Read_inputMetaboliteLevelsFiles();
+            metaboliteLevels.ReadInputMetabolites();
+
+            //calculate statistics
+            outputToLog.WriteLine("calculating metabolite statistics");
+            metaboliteStats.StartMetaboliteStats();
 
             //print the files
             outputToLog.WriteLine("printing the output files");
-            msAnalysisOutput.printTheDetails();
+            analysisOutput.printTheDetails();
 
             countTime.Stop();
             outputToLog.WriteLine(string.Format("Done in {0:00}h {1:00}min {2:00}sec {3:00}msec", countTime.Elapsed.Hours, countTime.Elapsed.Minutes, countTime.Elapsed.Seconds, countTime.Elapsed.Milliseconds / 10));

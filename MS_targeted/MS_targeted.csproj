@@ -52,16 +52,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="analysisOutput.cs" />
     <Compile Include="clinicalData.cs" />
     <Compile Include="clinicalDataFS.cs" />
     <Compile Include="correlations.R.cs" />
     <Compile Include="foldChangeCI.R.cs" />
     <Compile Include="imputedValues.cs" />
-    <Compile Include="interMetaboliteConnection.cs" />
-    <Compile Include="interMetaboliteConnections.cs" />
-    <Compile Include="msAnalysisOutput.cs" />
+    <Compile Include="metaboliteLevels.cs" />
+    <Compile Include="metaboliteRatio.cs" />
+    <Compile Include="metaboliteRatios.cs" />
+    <Compile Include="metaboliteStats.cs" />
     <Compile Include="msMetabolite.cs" />
-    <Compile Include="msMetaboliteLevels.cs" />
     <Compile Include="outputToLog.cs" />
     <Compile Include="permutationTest.R.cs" />
     <Compile Include="printBoxplots.R.cs" />

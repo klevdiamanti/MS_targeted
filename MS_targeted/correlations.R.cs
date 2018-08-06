@@ -129,9 +129,9 @@ namespace MS_targeted
             }
 
             List<string> metabNameList = new List<string>();
-            foreach (string chrg in msMetaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue).Select(x => x.Charge).Distinct())
+            foreach (string chrg in metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue).Select(x => x.Charge).Distinct())
             {
-                metabNameList.AddRange(msMetaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == chrg)
+                metabNameList.AddRange(metaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == chrg)
                     .ListOfMetabolites.Select(x => x.mtbltDetails.In_customId + "_" + chrg).ToList());
             }
 
@@ -167,11 +167,11 @@ namespace MS_targeted
         /// <returns></returns>
         private static double[,] correlationMetabsCovarsMatrix(string tissue, string charge, string metaboliteID)
         {
-            int numOfSamples = msMetaboliteLevels.List_SampleForTissueAndCharge.Count(x => x.Tissue == tissue && x.Charge == charge);
-            int numOfClinicalData = msMetaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge).ListOfNumClinicalData.Count + 1;
+            int numOfSamples = metaboliteLevels.List_SampleForTissueAndCharge.Count(x => x.Tissue == tissue && x.Charge == charge);
+            int numOfClinicalData = metaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge).ListOfNumClinicalData.Count + 1;
             double[,] ctm = new double[numOfSamples, numOfClinicalData];
             int cntRow = 0, cntCol = 0;
-            foreach (sampleForTissueAndCharge sftac in msMetaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge))
+            foreach (sampleForTissueAndCharge sftac in metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge))
             {
                 ctm[cntRow, cntCol++] = sftac.ListOfMetabolites.First(x => x.mtbltDetails.In_customId == metaboliteID).mtbltVals.Imputed;
                 foreach (sampleForTissueAndCharge.numClinicalData t_cd in sftac.ListOfNumClinicalData)
@@ -186,18 +186,18 @@ namespace MS_targeted
 
         private static double[,] correlationMetabsMetabsMatrix(string tissue)
         {
-            int numOfSamples = msMetaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue).Select(x => x.Id).Distinct().Count();
+            int numOfSamples = metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue).Select(x => x.Id).Distinct().Count();
             int numOfMetabolites = 0;
-            foreach (string chrg in msMetaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue).Select(x => x.Charge).Distinct())
+            foreach (string chrg in metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue).Select(x => x.Charge).Distinct())
             {
-                numOfMetabolites += msMetaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == chrg)
+                numOfMetabolites += metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == chrg)
                     .SelectMany(x => x.ListOfMetabolites).Select(x => x.mtbltDetails.In_customId).Distinct().Count();
             }
             double[,] ctm = new double[numOfSamples, numOfMetabolites];
             int cntRow = 0, cntColStart = 0, cntCol = cntColStart;
-            foreach (string chrg in msMetaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue).Select(x => x.Charge).Distinct())
+            foreach (string chrg in metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue).Select(x => x.Charge).Distinct())
             {
-                foreach (sampleForTissueAndCharge sftac in msMetaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == chrg))
+                foreach (sampleForTissueAndCharge sftac in metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == chrg))
                 {
                     foreach (sampleForTissueAndCharge.parentMetabolite pm in sftac.ListOfMetabolites)
                     {
@@ -207,7 +207,7 @@ namespace MS_targeted
                     cntCol = cntColStart;
                 }
                 cntRow = 0;
-                cntColStart += msMetaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == chrg).ListOfMetabolites.Count;
+                cntColStart += metaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == chrg).ListOfMetabolites.Count;
                 cntCol = cntColStart;
             }
             return ctm;

@@ -15,9 +15,9 @@ namespace MS_targeted
 
         public sampleForTissueAndCharge(List<string> _metabolitebVals, List<msMetabolite> _lom)
         {
-            Id = _metabolitebVals.First();
-            Tissue = _metabolitebVals.ElementAt(1);
-            Charge = _metabolitebVals.ElementAt(2);
+            Id = _metabolitebVals.ElementAt(publicVariables.indexToStartFrom - 3);
+            Tissue = _metabolitebVals.ElementAt(publicVariables.indexToStartFrom - 2);
+            Charge = _metabolitebVals.ElementAt(publicVariables.indexToStartFrom - 1);
             Phenotype = (clinicalData.List_clinicalData.Any(x => x.Id == Id)) ? clinicalData.List_clinicalData.First(x => x.Id == Id).Phenotype : "U";
 
             ListOfNumClinicalData = new List<numClinicalData>();

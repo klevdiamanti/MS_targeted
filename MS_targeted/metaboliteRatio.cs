@@ -1,9 +1,8 @@
-﻿
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace MS_targeted
 {
-    public class interMetaboliteConnection
+    public class metaboliteRatio
     {
         public string Tissue { get; set; }
         public string CustomId_nominator { get; set; }

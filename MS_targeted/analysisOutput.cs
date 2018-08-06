@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace MS_targeted
 {
-    public static class msAnalysisOutput
+    public static class analysisOutput
     {
         public static void printTheDetails()
         {
@@ -27,7 +27,7 @@ namespace MS_targeted
                 }
                 Directory.CreateDirectory(@"" + boxplotDirectory);
                 string boxplotImputeFile = Path.Combine(boxplotDirectory, "boxplots.pdf");
-                printBoxplots.printMyBoxplot(boxplotImputeFile, msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Phenotype).Distinct().Where(x => !publicVariables.excludedPhenotypes.Contains(x)).OrderBy(x => x).ToList());
+                printBoxplots.printMyBoxplot(boxplotImputeFile, metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Phenotype).Distinct().Where(x => !publicVariables.excludedPhenotypes.Contains(x)).OrderBy(x => x).ToList());
             }
 
             if (publicVariables.printScatterplots)
@@ -185,9 +185,9 @@ namespace MS_targeted
                     ));
 
                 //BODY
-                foreach (string mtblid in msMetaboliteLevels.List_SampleForTissueAndCharge.SelectMany(x => x.ListOfMetabolites).Select(x => x.mtbltDetails.In_customId).Distinct().OrderBy(x => x))
+                foreach (string mtblid in metaboliteLevels.List_SampleForTissueAndCharge.SelectMany(x => x.ListOfMetabolites).Select(x => x.mtbltDetails.In_customId).Distinct().OrderBy(x => x))
                 {
-                    msMetabolite mtbl = msMetaboliteLevels.List_SampleForTissueAndCharge.SelectMany(x => x.ListOfMetabolites).First(x => x.mtbltDetails.In_customId == mtblid).mtbltDetails;
+                    msMetabolite mtbl = metaboliteLevels.List_SampleForTissueAndCharge.SelectMany(x => x.ListOfMetabolites).First(x => x.mtbltDetails.In_customId == mtblid).mtbltDetails;
                     output.WriteLine(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}",
                         publicVariables.breakCharInFile,
                         mtbl.In_Name,
@@ -209,17 +209,17 @@ namespace MS_targeted
         private static void printPathwaysForMetabolites(string outputFilePrefix)
         {
             string pairwiseTest;
-            foreach (string tissue in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct())
+            foreach (string tissue in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct())
             {
                 using (TextWriter output = new StreamWriter(@"" + outputFilePrefix + "_" + tissue + publicVariables.suffix))
                 {
                     pairwiseTest = (publicVariables.numberOfClasses == publicVariables.numberOfClassesValues.two) ? "" : "pVal" + publicVariables.breakCharInFile;
-                    for (int i = 0; i < msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.Count; i++)
+                    for (int i = 0; i < metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.Count; i++)
                     {
-                        pairwiseTest += msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "v" +
-                            msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "r" + publicVariables.breakCharInFile +
-                            msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "v" +
-                            msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "p" + publicVariables.breakCharInFile;
+                        pairwiseTest += metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "v" +
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "r" + publicVariables.breakCharInFile +
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "v" +
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "p" + publicVariables.breakCharInFile;
                     }
                     pairwiseTest = pairwiseTest.Substring(0, pairwiseTest.Length - 1);
 
@@ -243,13 +243,13 @@ namespace MS_targeted
                                                   "Genes"
                                                   ));
 
-                    foreach (string charge in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct())
+                    foreach (string charge in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct())
                     {
-                        foreach (string currPathwayID in msMetaboliteLevels.List_SampleForTissueAndCharge.SelectMany(x => x.ListOfMetabolites).Select(x => x.mtbltDetails)
+                        foreach (string currPathwayID in metaboliteLevels.List_SampleForTissueAndCharge.SelectMany(x => x.ListOfMetabolites).Select(x => x.mtbltDetails)
                             .Where(x => x.List_of_pathways != null && x.List_of_pathways.Count > 0).SelectMany(x => x.List_of_pathways).SelectMany(x => x.pathwayID()).GroupBy(x => x)
                             .OrderByDescending(x => x.Count()).ThenBy(x => x.Key).Select(x => x.Key))
                         {
-                            foreach (msMetabolite metabolitePerPathway in msMetaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge).ListOfMetabolites.Select(x => x.mtbltDetails))
+                            foreach (msMetabolite metabolitePerPathway in metaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge).ListOfMetabolites.Select(x => x.mtbltDetails))
                             {
                                 if (metabolitePerPathway.List_of_pathways != null && metabolitePerPathway.List_of_pathways.Count > 0 && metabolitePerPathway.List_of_pathways.Any(x => x.pathwayID().Any(y => y == currPathwayID)))
                                 {
@@ -265,14 +265,14 @@ namespace MS_targeted
 
                                     output.WriteLine(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}{0}{14}{0}{15}{0}{16}",
                                                     publicVariables.breakCharInFile,
-                                                    msMetaboliteLevels.List_SampleForTissueAndCharge.SelectMany(x => x.ListOfMetabolites).Select(x => x.mtbltDetails)
+                                                    metaboliteLevels.List_SampleForTissueAndCharge.SelectMany(x => x.ListOfMetabolites).Select(x => x.mtbltDetails)
                                                         .Where(x => x.List_of_pathways != null && x.List_of_pathways.Count > 0).SelectMany(x => x.List_of_pathways)
                                                         .First(x => x.pathwayID().Any(y => y == currPathwayID)).Super_class,
                                                     currPathwayID,
-                                                    msMetaboliteLevels.List_SampleForTissueAndCharge.SelectMany(x => x.ListOfMetabolites).Select(x => x.mtbltDetails)
+                                                    metaboliteLevels.List_SampleForTissueAndCharge.SelectMany(x => x.ListOfMetabolites).Select(x => x.mtbltDetails)
                                                         .Where(x => x.List_of_pathways != null && x.List_of_pathways.Count > 0).SelectMany(x => x.List_of_pathways)
                                                         .First(x => x.pathwayID().Any(y => y == currPathwayID)).pathwayDetails(),
-                                                    msMetaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge).ListOfMetabolites.Select(x => x.mtbltDetails)
+                                                    metaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge).ListOfMetabolites.Select(x => x.mtbltDetails)
                                                                 .Count(x => x.List_of_pathways.Any(y => y.pathwayID().Any(z => z == currPathwayID))),
                                                     metabolitePerPathway.In_Name,
                                                     metabolitePerPathway.In_Formula,
@@ -291,7 +291,7 @@ namespace MS_targeted
                             }
                         }
 
-                        foreach (msMetabolite metaboliteWithNoPathway in msMetaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge)
+                        foreach (msMetabolite metaboliteWithNoPathway in metaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge)
                             .ListOfMetabolites.Select(x => x.mtbltDetails).Where(x => x.List_of_pathways == null || x.List_of_pathways.Count == 0))
                         {
                             pairwiseTest = (publicVariables.numberOfClasses == publicVariables.numberOfClassesValues.two) ? "" : metaboliteWithNoPathway.ListOfStats.MultiGroupPvalue.ToString() + publicVariables.breakCharInFile;
@@ -332,19 +332,19 @@ namespace MS_targeted
         private static void printMetaboliteStatistics(string detailsFilePrefix)
         {
             string pairwiseTest;
-            foreach (string tissue in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct())
+            foreach (string tissue in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct())
             {
                 using (TextWriter output = new StreamWriter(@"" + detailsFilePrefix + "_" + tissue + publicVariables.suffix))
                 {
                     pairwiseTest = (publicVariables.numberOfClasses == publicVariables.numberOfClassesValues.two) ? "" : "pVal" + publicVariables.breakCharInFile;
-                    for (int i = 0; i < msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.Count; i++)
+                    for (int i = 0; i < metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.Count; i++)
                     {
-                        pairwiseTest += msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "to" +
-                            msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "fc" + publicVariables.breakCharInFile +
-                            msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "to" +
-                            msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "ci" + publicVariables.breakCharInFile +
-                            msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "to" +
-                            msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "pv" + publicVariables.breakCharInFile;
+                        pairwiseTest += metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "to" +
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "fc" + publicVariables.breakCharInFile +
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "to" +
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "ci" + publicVariables.breakCharInFile +
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "to" +
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "pv" + publicVariables.breakCharInFile;
                     }
                     pairwiseTest = pairwiseTest.Substring(0, pairwiseTest.Length - 1);
 
@@ -368,9 +368,9 @@ namespace MS_targeted
                                                   "PathwayIDs"
                                                   ));
 
-                    foreach (string charge in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct())
+                    foreach (string charge in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct())
                     {
-                        foreach (msMetabolite metabolitePerPathway in msMetaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge).ListOfMetabolites.Select(x => x.mtbltDetails))
+                        foreach (msMetabolite metabolitePerPathway in metaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge).ListOfMetabolites.Select(x => x.mtbltDetails))
                         {
                             pairwiseTest = (publicVariables.numberOfClasses == publicVariables.numberOfClassesValues.two) ? "" : metabolitePerPathway.ListOfStats.MultiGroupPvalue.ToString() + publicVariables.breakCharInFile;
                             for (int i = 0; i < metabolitePerPathway.ListOfStats.PairwiseTestPvalue.Count; i++)
@@ -411,11 +411,24 @@ namespace MS_targeted
 
         private static void printMetaboliteRegressionStatistics(string detailsFilePrefix)
         {
-            foreach (string tissue in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct())
+            string pairwiseTest;
+            foreach (string tissue in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct())
             {
                 using (TextWriter output = new StreamWriter(@"" + detailsFilePrefix + "_" + tissue + publicVariables.suffix))
                 {
-                    output.WriteLine(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}{0}{14}{0}{15}{0}{16}",
+                    pairwiseTest = (publicVariables.numberOfClasses == publicVariables.numberOfClassesValues.two) ? "" : "pVal" + publicVariables.breakCharInFile;
+                    for (int i = 0; i < metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.Count; i++)
+                    {
+                        pairwiseTest += metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "to" +
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "fc" + publicVariables.breakCharInFile +
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "to" +
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "ci" + publicVariables.breakCharInFile +
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "to" +
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "pv" + publicVariables.breakCharInFile;
+                    }
+                    pairwiseTest = pairwiseTest.Substring(0, pairwiseTest.Length - 1);
+
+                    output.WriteLine(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}{0}{14}{0}{15}{0}{16}{0}{17}",
                                                   publicVariables.breakCharInFile,
                                                   "BiochemicalName",
                                                   "Formula",
@@ -424,8 +437,9 @@ namespace MS_targeted
                                                   "Class",
                                                   "Platform",
                                                   "Charge",
-                                                  string.Join(publicVariables.breakCharInFile.ToString(), 
-                                                    msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.RegressionValues.Select(x => x.clinical_data_name +
+                                                  pairwiseTest,
+                                                  string.Join(publicVariables.breakCharInFile.ToString(),
+                                                    metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.RegressionValues.Select(x => x.clinical_data_name +
                                                         "_pv" + publicVariables.breakCharInFile.ToString() + x.clinical_data_name + "_r2adjust")),
                                                   "CAS",
                                                   "HMDB",
@@ -437,11 +451,22 @@ namespace MS_targeted
                                                   "PathwayIDs"
                                                   ));
 
-                    foreach (string charge in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct())
+                    foreach (string charge in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct())
                     {
-                        foreach (msMetabolite metabolitePerPathway in msMetaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge).ListOfMetabolites.Select(x => x.mtbltDetails))
+                        foreach (msMetabolite metabolitePerPathway in metaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge).ListOfMetabolites.Select(x => x.mtbltDetails))
                         {
-                            output.WriteLine(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}{0}{14}{0}{15}{0}{16}",
+                            pairwiseTest = (publicVariables.numberOfClasses == publicVariables.numberOfClassesValues.two) ? "" : metabolitePerPathway.ListOfStats.MultiGroupPvalue.ToString() + publicVariables.breakCharInFile;
+                            for (int i = 0; i < metabolitePerPathway.ListOfStats.PairwiseTestPvalue.Count; i++)
+                            {
+                                pairwiseTest += string.Format("{1}{0}{2}{0}{3}{0}",
+                                    publicVariables.breakCharInFile,
+                                    metabolitePerPathway.ListOfStats.Ratio.ElementAt(i).fold_change,
+                                    "[" + metabolitePerPathway.ListOfStats.Ratio.ElementAt(i).ci_lower + "," + metabolitePerPathway.ListOfStats.Ratio.ElementAt(i).ci_upper + "]",
+                                    metabolitePerPathway.ListOfStats.PairwiseTestPvalue.ElementAt(i).pairValue);
+                            }
+                            pairwiseTest = pairwiseTest.Substring(0, pairwiseTest.Length - 1);
+
+                            output.WriteLine(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}{0}{14}{0}{15}{0}{16}{0}{17}",
                                               publicVariables.breakCharInFile,
                                               metabolitePerPathway.In_AZmNameFixed,
                                               metabolitePerPathway.In_Formula,
@@ -450,6 +475,7 @@ namespace MS_targeted
                                               metabolitePerPathway.My_taxonomy.Tclass,
                                               publicVariables.prefix.ToString().ToUpper(),
                                               charge,
+                                              pairwiseTest,
                                               string.Join(publicVariables.breakCharInFile.ToString(), metabolitePerPathway.ListOfStats.RegressionValues.Select(x => x.regrPvalue.ToString() +
                                                 publicVariables.breakCharInFile.ToString() + x.regrAdjRsquare.ToString())),
                                               metabolitePerPathway.In_Cas_id,
@@ -470,7 +496,7 @@ namespace MS_targeted
 
         private static void printCorrelationsMetabolitesToCovariates(string corrsCovsFilePrefix)
         {
-            foreach (string tissue in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct())
+            foreach (string tissue in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct())
             {
                 using (TextWriter output = new StreamWriter(@"" + corrsCovsFilePrefix + "_" + tissue + publicVariables.suffix))
                 {
@@ -481,7 +507,7 @@ namespace MS_targeted
                         "Platform",
                         "Charge",
                         string.Join(publicVariables.breakCharInFile.ToString(),
-                            msMetaboliteLevels.List_SampleForTissueAndCharge.First().ListOfNumClinicalData
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfNumClinicalData
                             .Select(x => x.name + "_c" + publicVariables.breakCharInFile + x.name + "_p" + publicVariables.breakCharInFile + x.name + "_pAdjust")),
                         "CAS",
                         "HMDB",
@@ -491,9 +517,9 @@ namespace MS_targeted
                         "CustID"
                         ));
 
-                    foreach (string charge in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct())
+                    foreach (string charge in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct())
                     {
-                        foreach (msMetabolite mtbl in msMetaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge).ListOfMetabolites.Select(x => x.mtbltDetails))
+                        foreach (msMetabolite mtbl in metaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge).ListOfMetabolites.Select(x => x.mtbltDetails))
                         {
                             output.WriteLine(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}",
                                 publicVariables.breakCharInFile,
@@ -547,9 +573,9 @@ namespace MS_targeted
                     "Comment"));
 
                 //BODY
-                foreach (string mtblid in msMetaboliteLevels.List_SampleForTissueAndCharge.SelectMany(x => x.ListOfMetabolites).Select(x => x.mtbltDetails.In_customId).Distinct().OrderBy(x => x))
+                foreach (string mtblid in metaboliteLevels.List_SampleForTissueAndCharge.SelectMany(x => x.ListOfMetabolites).Select(x => x.mtbltDetails.In_customId).Distinct().OrderBy(x => x))
                 {
-                    msMetabolite mtbl = msMetaboliteLevels.List_SampleForTissueAndCharge.SelectMany(x => x.ListOfMetabolites).First(x => x.mtbltDetails.In_customId == mtblid).mtbltDetails;
+                    msMetabolite mtbl = metaboliteLevels.List_SampleForTissueAndCharge.SelectMany(x => x.ListOfMetabolites).First(x => x.mtbltDetails.In_customId == mtblid).mtbltDetails;
                     output.WriteLine(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}{0}{14}{0}{15}{0}{16}{0}{17}{0}{18}{0}{19}{0}{20}{0}{21}",
                         publicVariables.breakCharInFile,
                         mtbl.In_Name,
@@ -580,19 +606,19 @@ namespace MS_targeted
         private static void printMetaboliteLevelsForDatabase(string metabolitesLevelsOutputFile)
         {
             List<string> listOfCustId;
-            foreach (string tissue in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct())
+            foreach (string tissue in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct())
             {
-                foreach (string charge in msMetaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue).Select(x => x.Charge).Distinct())
+                foreach (string charge in metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue).Select(x => x.Charge).Distinct())
                 {
                     using (TextWriter output = new StreamWriter(@"" + metabolitesLevelsOutputFile + "_" + tissue + "_" + charge + publicVariables.suffix))
                     {
                         //HEADER
-                        listOfCustId = msMetaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge).SelectMany(x => x.ListOfMetabolites)
+                        listOfCustId = metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge).SelectMany(x => x.ListOfMetabolites)
                             .Select(x => x.mtbltDetails).Select(x => x.In_customId).Distinct().ToList();
                         output.WriteLine("Patient_ID" + publicVariables.breakCharInFile + string.Join(publicVariables.breakCharInFile.ToString(), listOfCustId));
 
                         //BODY
-                        foreach (sampleForTissueAndCharge smtac in msMetaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge))
+                        foreach (sampleForTissueAndCharge smtac in metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge))
                         {
                             output.Write(smtac.Id);
                             foreach (string cid in listOfCustId)
@@ -616,20 +642,20 @@ namespace MS_targeted
         private static void printRosettaDatasets(string rosettaDatasetImputeFile)
         {
             List<string> listOfCustId;
-            foreach (string tissue in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct())
+            foreach (string tissue in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct())
             {
-                foreach (string charge in msMetaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue).Select(x => x.Charge).Distinct())
+                foreach (string charge in metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue).Select(x => x.Charge).Distinct())
                 {
                     using (TextWriter output = new StreamWriter(@"" + rosettaDatasetImputeFile + "_" + tissue + "_" + charge + publicVariables.suffix))
                     {
                         //HEADER
-                        listOfCustId = msMetaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge).SelectMany(x => x.ListOfMetabolites)
+                        listOfCustId = metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge).SelectMany(x => x.ListOfMetabolites)
                             .Select(x => x.mtbltDetails).Select(x => x.In_customId).Distinct().ToList();
                         output.WriteLine(string.Join(publicVariables.breakCharInFile.ToString(), listOfCustId) + publicVariables.breakCharInFile + "Phenotype");
                         //output.WriteLine(string.Join(publicVariables.breakCharInFile.ToString(), Enumerable.Repeat("float(0)", listOfCustId.Count)) + publicVariables.breakCharInFile + "string");
 
                         //BODY
-                        foreach (sampleForTissueAndCharge sftac in msMetaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge))
+                        foreach (sampleForTissueAndCharge sftac in metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge))
                         {
                             if (!publicVariables.excludedPhenotypes.Contains(sftac.Phenotype))
                             {
@@ -648,31 +674,31 @@ namespace MS_targeted
         private static void printCorrelationsMetabolitesToMetabolites(string corrsMetabsFilePrefix)
         {
             string line_to_print;
-            foreach (string tissue in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct())
+            foreach (string tissue in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct())
             {
                 using (TextWriter output_pval = new StreamWriter(@"" + corrsMetabsFilePrefix + "_pValueAdjust_" + tissue + publicVariables.suffix))
                 {
                     using (TextWriter output_corrVal = new StreamWriter(@"" + corrsMetabsFilePrefix + "_corrValue_" + tissue + publicVariables.suffix))
                     {
                         line_to_print = publicVariables.breakCharInFile.ToString();
-                        foreach (string mid in msMetaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue).ListOfMetabolites
+                        foreach (string mid in metaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue).ListOfMetabolites
                                 .Select(x => x.mtbltDetails.ListOfStats.CorrelationMetabolites).First().Select(x => x.metab_id.Split('_').First()))
                         {
-                            line_to_print += publicVariables.breakCharInFile.ToString() + msMetaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue)
+                            line_to_print += publicVariables.breakCharInFile.ToString() + metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue)
                                 .SelectMany(x => x.ListOfMetabolites).Select(x => x.mtbltDetails).First(x => x.In_customId == mid).In_Name;
                         }
                         output_pval.WriteLine(line_to_print);
                         output_corrVal.WriteLine(line_to_print);
 
-                        line_to_print =publicVariables.breakCharInFile.ToString() + publicVariables.breakCharInFile.ToString() +
-                            string.Join(publicVariables.breakCharInFile.ToString(), msMetaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue).ListOfMetabolites
+                        line_to_print = publicVariables.breakCharInFile.ToString() + publicVariables.breakCharInFile.ToString() +
+                            string.Join(publicVariables.breakCharInFile.ToString(), metaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue).ListOfMetabolites
                                 .Select(x => x.mtbltDetails.ListOfStats.CorrelationMetabolites).First().Select(x => x.metab_id.Split('_').First()));
                         output_pval.WriteLine(line_to_print);
                         output_corrVal.WriteLine(line_to_print);
 
-                        foreach (string charge in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct())
+                        foreach (string charge in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct())
                         {
-                            foreach (msMetabolite msm in msMetaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge)
+                            foreach (msMetabolite msm in metaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge)
                                 .ListOfMetabolites.Select(x => x.mtbltDetails))
                             {
                                 output_pval.WriteLine(msm.In_Name + publicVariables.breakCharInFile.ToString() + msm.In_customId + publicVariables.breakCharInFile.ToString() +
@@ -690,29 +716,29 @@ namespace MS_targeted
         private static void printOutputForMoDentify(string modentifyFilesPrefix)
         {
             //Data
-            using (TextWriter output = new StreamWriter(@"" + modentifyFilesPrefix + "_AZm_data" + publicVariables.suffix))
+            using (TextWriter output = new StreamWriter(@"" + modentifyFilesPrefix + "_data" + publicVariables.suffix))
             {
                 //NAMES
                 string line_to_print = publicVariables.breakCharInFile.ToString();
-                foreach (string tissue in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct().OrderBy(x => x))
+                foreach (string tissue in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct().OrderBy(x => x))
                 {
-                    foreach (string charge in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct().OrderBy(x => x))
+                    foreach (string charge in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct().OrderBy(x => x))
                     {
-                        line_to_print += publicVariables.breakCharInFile.ToString() + string.Join(publicVariables.breakCharInFile.ToString(), msMetaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge)
+                        line_to_print += publicVariables.breakCharInFile.ToString() + string.Join(publicVariables.breakCharInFile.ToString(), metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge)
                             .Select(x => x.ListOfMetabolites).First().Select(x => x.mtbltDetails).OrderBy(x => x.In_customId)
                             .Select(x => tissue + "::" + x.In_AZmNameFixed));
                     }
-                    
+
                 }
                 output.WriteLine(line_to_print);
 
                 //CUSTOM IDs
                 line_to_print = publicVariables.breakCharInFile.ToString();
-                foreach (string tissue in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct().OrderBy(x => x))
+                foreach (string tissue in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct().OrderBy(x => x))
                 {
-                    foreach (string charge in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct().OrderBy(x => x))
+                    foreach (string charge in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct().OrderBy(x => x))
                     {
-                        line_to_print += publicVariables.breakCharInFile.ToString() + string.Join(publicVariables.breakCharInFile.ToString(), msMetaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge)
+                        line_to_print += publicVariables.breakCharInFile.ToString() + string.Join(publicVariables.breakCharInFile.ToString(), metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge)
                             .Select(x => x.ListOfMetabolites).First().Select(x => x.mtbltDetails).OrderBy(x => x.In_customId)
                             .Select(x => tissue + "::" + x.In_customId));
                     }
@@ -720,23 +746,23 @@ namespace MS_targeted
                 output.WriteLine(line_to_print);
 
                 //Data
-                foreach (string sampleID in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Id).Distinct().OrderBy(x => x))
+                foreach (string sampleID in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Id).Distinct().OrderBy(x => x))
                 {
-                    line_to_print = msMetaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Id == sampleID).Phenotype + publicVariables.breakCharInFile.ToString() + sampleID;
-                    foreach (string tissue in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct().OrderBy(x => x))
+                    line_to_print = metaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Id == sampleID).Phenotype + publicVariables.breakCharInFile.ToString() + sampleID;
+                    foreach (string tissue in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct().OrderBy(x => x))
                     {
-                        foreach (string charge in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct().OrderBy(x => x))
+                        foreach (string charge in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct().OrderBy(x => x))
                         {
-                            if (msMetaboliteLevels.List_SampleForTissueAndCharge.Count(x => x.Id == sampleID && x.Tissue == tissue && x.Charge == charge) == 0)
+                            if (metaboliteLevels.List_SampleForTissueAndCharge.Count(x => x.Id == sampleID && x.Tissue == tissue && x.Charge == charge) == 0)
                             {
-                                line_to_print += publicVariables.breakCharInFile.ToString() + string.Join(publicVariables.breakCharInFile.ToString(), Enumerable.Repeat("", 
-                                    msMetaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge).First(x => x.ListOfMetabolites.Count != 0)
+                                line_to_print += publicVariables.breakCharInFile.ToString() + string.Join(publicVariables.breakCharInFile.ToString(), Enumerable.Repeat("",
+                                    metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge).First(x => x.ListOfMetabolites.Count != 0)
                                     .ListOfMetabolites.Count));
                             }
-                            else if (msMetaboliteLevels.List_SampleForTissueAndCharge.Count(x => x.Id == sampleID && x.Tissue == tissue && x.Charge == charge) == 1)
+                            else if (metaboliteLevels.List_SampleForTissueAndCharge.Count(x => x.Id == sampleID && x.Tissue == tissue && x.Charge == charge) == 1)
                             {
                                 line_to_print += publicVariables.breakCharInFile.ToString() +
-                                    string.Join(publicVariables.breakCharInFile.ToString(), msMetaboliteLevels.List_SampleForTissueAndCharge.
+                                    string.Join(publicVariables.breakCharInFile.ToString(), metaboliteLevels.List_SampleForTissueAndCharge.
                                         First(x => x.Id == sampleID && x.Tissue == tissue && x.Charge == charge)
                                             .ListOfMetabolites.OrderBy(x => x.mtbltDetails.In_customId).Select(x => x.mtbltVals.Imputed));
                             }
@@ -752,7 +778,7 @@ namespace MS_targeted
             }
 
             //Annotations
-            using (TextWriter output = new StreamWriter(@"" + modentifyFilesPrefix + "_AZm_annotations" + publicVariables.suffix))
+            using (TextWriter output = new StreamWriter(@"" + modentifyFilesPrefix + "_annotations" + publicVariables.suffix))
             {
                 //Header
                 output.WriteLine(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}{0}{14}{0}{15}{0}{16}{0}{17}{0}{18}{0}{19}{0}{20}{0}{21}{0}{22}{0}{23}{0}{24}{0}{25}{0}{26}",
@@ -762,11 +788,11 @@ namespace MS_targeted
 
                 //Body
                 string cSuperClass = "", cTClass = "";
-                foreach (string tissue in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct().OrderBy(x => x))
+                foreach (string tissue in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct().OrderBy(x => x))
                 {
-                    foreach (string charge in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct().OrderBy(x => x))
+                    foreach (string charge in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct().OrderBy(x => x))
                     {
-                        foreach (msMetabolite msm in msMetaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge).ListOfMetabolites
+                        foreach (msMetabolite msm in metaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge).ListOfMetabolites
                             .Select(x => x.mtbltDetails).OrderBy(x => x.In_customId))
                         {
                             cSuperClass = (msm.My_taxonomy.Super_class == "Organic compounds") ? msm.My_taxonomy.Tclass : msm.My_taxonomy.Super_class;
@@ -805,7 +831,7 @@ namespace MS_targeted
             }
 
             //Phenotypes
-            using (TextWriter output = new StreamWriter(@"" + modentifyFilesPrefix + "_AZm_phenotypes" + publicVariables.suffix))
+            using (TextWriter output = new StreamWriter(@"" + modentifyFilesPrefix + "_phenotypes" + publicVariables.suffix))
             {
                 Dictionary<string, Dictionary<string, int>> discToNumDict = new Dictionary<string, Dictionary<string, int>>();
                 discToNumDict.Add("CurrPhenotype", new Dictionary<string, int>());
@@ -825,7 +851,7 @@ namespace MS_targeted
                     }
                     else
                     {
-                        discToNumDict.Add(discToNumPenos.Key, new Dictionary<string, int>() { { discToNumPenos.Value, 0} });
+                        discToNumDict.Add(discToNumPenos.Key, new Dictionary<string, int>() { { discToNumPenos.Value, 0 } });
                     }
                 }
 
@@ -870,54 +896,54 @@ namespace MS_targeted
         {
             string line_to_print;
             //Ratio
-            foreach (string tissue in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct().OrderBy(x => x))
+            foreach (string tissue in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct().OrderBy(x => x))
             {
                 using (TextWriter output = new StreamWriter(@"" + metaboliteRatioFilesPrefix + "_" + tissue + publicVariables.suffix))
                 {
-                    foreach (string phenotype in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Phenotype).Distinct().OrderBy(x => x))
+                    foreach (string phenotype in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Phenotype).Distinct().OrderBy(x => x))
                     {
-                        if (msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Phenotype).Distinct().OrderBy(x => x).First() != phenotype)
+                        if (metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Phenotype).Distinct().OrderBy(x => x).First() != phenotype)
                         {
                             output.WriteLine();
                         }
 
                         //HEADER line 1 metabolite biochemichal names
                         line_to_print = "";
-                        foreach (string charge in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct().OrderBy(x => x))
+                        foreach (string charge in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct().OrderBy(x => x))
                         {
-                            if (msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct().OrderBy(x => x).First() == charge)
+                            if (metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct().OrderBy(x => x).First() == charge)
                             {
                                 line_to_print += publicVariables.breakCharInFile.ToString() + phenotype + publicVariables.breakCharInFile.ToString() +
-                                    string.Join(publicVariables.breakCharInFile.ToString(), msMetaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge)
+                                    string.Join(publicVariables.breakCharInFile.ToString(), metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge)
                                     .Select(x => x.ListOfMetabolites).First().Select(x => x.mtbltDetails).OrderBy(x => x.In_customId)
                                     .Select(x => x.In_AZmNameFixed));
                             }
                             else
                             {
-                                line_to_print += publicVariables.breakCharInFile.ToString() + 
-                                    string.Join(publicVariables.breakCharInFile.ToString(), msMetaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge)
+                                line_to_print += publicVariables.breakCharInFile.ToString() +
+                                    string.Join(publicVariables.breakCharInFile.ToString(), metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge)
                                     .Select(x => x.ListOfMetabolites).First().Select(x => x.mtbltDetails).OrderBy(x => x.In_customId)
                                     .Select(x => x.In_AZmNameFixed));
                             }
-                            
+
                         }
                         output.WriteLine(line_to_print);
 
                         //HEADER line 2 metabolite custom IDs
                         line_to_print = "";
-                        foreach (string charge in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct().OrderBy(x => x))
+                        foreach (string charge in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct().OrderBy(x => x))
                         {
-                            if (msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct().OrderBy(x => x).First() == charge)
+                            if (metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct().OrderBy(x => x).First() == charge)
                             {
                                 line_to_print += publicVariables.breakCharInFile.ToString() + phenotype + publicVariables.breakCharInFile.ToString() +
-                                    string.Join(publicVariables.breakCharInFile.ToString(), msMetaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge)
+                                    string.Join(publicVariables.breakCharInFile.ToString(), metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge)
                                     .Select(x => x.ListOfMetabolites).First().Select(x => x.mtbltDetails).OrderBy(x => x.In_customId)
                                     .Select(x => x.In_customId));
                             }
                             else
                             {
-                                line_to_print += publicVariables.breakCharInFile.ToString() + 
-                                    string.Join(publicVariables.breakCharInFile.ToString(), msMetaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge)
+                                line_to_print += publicVariables.breakCharInFile.ToString() +
+                                    string.Join(publicVariables.breakCharInFile.ToString(), metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge)
                                     .Select(x => x.ListOfMetabolites).First().Select(x => x.mtbltDetails).OrderBy(x => x.In_customId)
                                     .Select(x => x.In_customId));
                             }
@@ -925,32 +951,32 @@ namespace MS_targeted
                         output.WriteLine(line_to_print);
 
                         //RATIOS
-                        foreach (string charge_nom in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct().OrderBy(x => x))
+                        foreach (string charge_nom in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct().OrderBy(x => x))
                         {
-                            foreach (string cid_nom in msMetaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge_nom && x.Phenotype == phenotype)
+                            foreach (string cid_nom in metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge_nom && x.Phenotype == phenotype)
                                 .Select(x => x.ListOfMetabolites).First().Select(x => x.mtbltDetails).OrderBy(x => x.In_customId)
                                 .Select(x => x.In_customId))
                             {
                                 //name and id of the nominator
-                                line_to_print = msMetaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge_nom && x.Phenotype == phenotype)
+                                line_to_print = metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge_nom && x.Phenotype == phenotype)
                                     .SelectMany(x => x.ListOfMetabolites).Select(x => x.mtbltDetails).First(x => x.In_customId == cid_nom).In_Name + publicVariables.breakCharInFile.ToString() + cid_nom;
-                                foreach (string charge_denom in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct().OrderBy(x => x))
+                                foreach (string charge_denom in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct().OrderBy(x => x))
                                 {
-                                    foreach (string cid_denom in msMetaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge_denom && x.Phenotype == phenotype)
+                                    foreach (string cid_denom in metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge_denom && x.Phenotype == phenotype)
                                         .Select(x => x.ListOfMetabolites).First().Select(x => x.mtbltDetails).OrderBy(x => x.In_customId)
                                         .Select(x => x.In_customId))
                                     {
-                                        if (msMetaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge_denom && x.Phenotype == phenotype)
+                                        if (metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge_denom && x.Phenotype == phenotype)
                                             .SelectMany(x => x.ListOfMetabolites).Count(x => x.mtbltDetails.In_customId == cid_denom) == 0)
                                         {
                                             continue;
                                         }
 
-                                        line_to_print += publicVariables.breakCharInFile.ToString() + 
+                                        line_to_print += publicVariables.breakCharInFile.ToString() +
                                             Convert.ToString(decimal.Round(
-                                            Convert.ToDecimal(msMetaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge_nom && x.Phenotype == phenotype)
+                                            Convert.ToDecimal(metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge_nom && x.Phenotype == phenotype)
                                             .SelectMany(x => x.ListOfMetabolites).Where(x => x.mtbltDetails.In_customId == cid_nom).Select(x => x.mtbltVals.Imputed).Average() /
-                                            msMetaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge_denom && x.Phenotype == phenotype)
+                                            metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge_denom && x.Phenotype == phenotype)
                                             .SelectMany(x => x.ListOfMetabolites).Where(x => x.mtbltDetails.In_customId == cid_denom).Select(x => x.mtbltVals.Imputed).Average()), 2, MidpointRounding.AwayFromZero));
                                     }
                                 }
@@ -962,12 +988,12 @@ namespace MS_targeted
             }
 
             //Ratio statistical significance
-            foreach (string tissue in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct().OrderBy(x => x))
+            foreach (string tissue in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct().OrderBy(x => x))
             {
                 using (TextWriter output = new StreamWriter(@"" + metaboliteRatioFilesPrefix + "_significance_" + tissue + publicVariables.suffix))
                 {
-                    List<string> phenotypes = interMetaboliteConnections.ListOfInterMetaboliteConnections.Select(x => x.Group1).Distinct().OrderBy(x => x).ToList();
-                    phenotypes.AddRange(interMetaboliteConnections.ListOfInterMetaboliteConnections.Select(x => x.Group2).Distinct().OrderBy(x => x));
+                    List<string> phenotypes = metaboliteRatios.ListOfInterMetaboliteConnections.Select(x => x.Group1).Distinct().OrderBy(x => x).ToList();
+                    phenotypes.AddRange(metaboliteRatios.ListOfInterMetaboliteConnections.Select(x => x.Group2).Distinct().OrderBy(x => x));
                     phenotypes = phenotypes.Distinct().ToList();
 
                     for (int i = 0; i < phenotypes.Count; i++)
@@ -976,45 +1002,45 @@ namespace MS_targeted
                         {
                             //HEADER
                             line_to_print = phenotypes.ElementAt(i) + publicVariables.breakCharInFile + phenotypes.ElementAt(j);
-                            foreach (string charge in interMetaboliteConnections.ListOfInterMetaboliteConnections.Select(x => x.Charge_nominator).OrderBy(x => x).Distinct())
+                            foreach (string charge in metaboliteRatios.ListOfInterMetaboliteConnections.Select(x => x.Charge_nominator).OrderBy(x => x).Distinct())
                             {
-                                foreach (string cid in interMetaboliteConnections.ListOfInterMetaboliteConnections
+                                foreach (string cid in metaboliteRatios.ListOfInterMetaboliteConnections
                                             .Where(x => x.Tissue == tissue && x.Charge_nominator == charge && x.Group1 == phenotypes.ElementAt(i))
                                             .Select(x => x.CustomId_nominator).Distinct().OrderBy(x => x))
                                 {
-                                    line_to_print += publicVariables.breakCharInFile + interMetaboliteConnections.ListOfInterMetaboliteConnections
+                                    line_to_print += publicVariables.breakCharInFile + metaboliteRatios.ListOfInterMetaboliteConnections
                                         .First(x => x.Tissue == tissue && x.Charge_nominator == charge && x.CustomId_nominator == cid).Name_nominator;
                                 }
                             }
                             output.WriteLine(line_to_print);
 
                             line_to_print = phenotypes.ElementAt(i) + publicVariables.breakCharInFile + phenotypes.ElementAt(j);
-                            foreach (string charge in interMetaboliteConnections.ListOfInterMetaboliteConnections.Select(x => x.Charge_nominator).OrderBy(x => x).Distinct())
+                            foreach (string charge in metaboliteRatios.ListOfInterMetaboliteConnections.Select(x => x.Charge_nominator).OrderBy(x => x).Distinct())
                             {
                                 line_to_print += publicVariables.breakCharInFile +
-                                        string.Join(publicVariables.breakCharInFile.ToString(), interMetaboliteConnections.ListOfInterMetaboliteConnections
+                                        string.Join(publicVariables.breakCharInFile.ToString(), metaboliteRatios.ListOfInterMetaboliteConnections
                                             .Where(x => x.Tissue == tissue && x.Charge_nominator == charge && x.Group1 == phenotypes.ElementAt(i))
                                             .Select(x => x.CustomId_nominator).Distinct().OrderBy(x => x));
                             }
                             output.WriteLine(line_to_print);
 
                             //BODY
-                            foreach (string charge_nom in interMetaboliteConnections.ListOfInterMetaboliteConnections.Select(x => x.Charge_nominator).OrderBy(x => x).Distinct())
+                            foreach (string charge_nom in metaboliteRatios.ListOfInterMetaboliteConnections.Select(x => x.Charge_nominator).OrderBy(x => x).Distinct())
                             {
-                                foreach (string cid_nom in interMetaboliteConnections.ListOfInterMetaboliteConnections
+                                foreach (string cid_nom in metaboliteRatios.ListOfInterMetaboliteConnections
                                     .Where(x => x.Tissue == tissue && x.Charge_nominator == charge_nom && x.Group1 == phenotypes.ElementAt(i))
                                     .Select(x => x.CustomId_nominator).Distinct().OrderBy(x => x))
                                 {
                                     //name and id of the nominator
-                                    line_to_print = interMetaboliteConnections.ListOfInterMetaboliteConnections.First(x => x.Tissue == tissue && x.Charge_nominator == charge_nom &&
+                                    line_to_print = metaboliteRatios.ListOfInterMetaboliteConnections.First(x => x.Tissue == tissue && x.Charge_nominator == charge_nom &&
                                                         x.CustomId_nominator == cid_nom).Name_nominator + publicVariables.breakCharInFile + cid_nom;
-                                    foreach (string charge_denom in interMetaboliteConnections.ListOfInterMetaboliteConnections.Select(x => x.Charge_denominator).OrderBy(x => x).Distinct())
+                                    foreach (string charge_denom in metaboliteRatios.ListOfInterMetaboliteConnections.Select(x => x.Charge_denominator).OrderBy(x => x).Distinct())
                                     {
-                                        foreach (string cid_denom in interMetaboliteConnections.ListOfInterMetaboliteConnections
+                                        foreach (string cid_denom in metaboliteRatios.ListOfInterMetaboliteConnections
                                             .Where(x => x.Tissue == tissue && x.Charge_denominator == charge_denom && x.Group2 == phenotypes.ElementAt(j))
                                             .Select(x => x.CustomId_denominator).Distinct().OrderBy(x => x))
                                         {
-                                            line_to_print += publicVariables.breakCharInFile.ToString() + interMetaboliteConnections.ListOfInterMetaboliteConnections
+                                            line_to_print += publicVariables.breakCharInFile.ToString() + metaboliteRatios.ListOfInterMetaboliteConnections
                                                 .First(x => x.Tissue == tissue && x.Group1 == phenotypes.ElementAt(i) && x.Group2 == phenotypes.ElementAt(j) &&
                                                 x.CustomId_nominator == cid_nom && x.CustomId_denominator == cid_denom && x.Charge_nominator == charge_nom &&
                                                 x.Charge_denominator == charge_denom).PValue;

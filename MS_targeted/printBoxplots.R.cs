@@ -31,9 +31,9 @@ namespace MS_targeted
                 };");
 
             //keep track of the last charge value so that we know when to print the tissue names
-            string lastCharge = msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct().OrderBy(x => x).Last();
+            string lastCharge = metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct().OrderBy(x => x).Last();
             //keep track of the first tissue value so that we know when to print the charge names
-            string firstTissue = msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct().OrderBy(x => x).First();
+            string firstTissue = metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct().OrderBy(x => x).First();
 
             //open the pdf stream
             rEngineInstance.engine.Evaluate(@"pdf(file=""" + outputFile.Replace("\\", "/") + @""", width=14, height=9)");
@@ -42,24 +42,24 @@ namespace MS_targeted
             List<Tuple<string, double>> phenoMetabValPairs, pValPairs;
 
             //loop over custom metabolite IDs
-            foreach (string mtblid in msMetaboliteLevels.List_SampleForTissueAndCharge.SelectMany(x => x.ListOfMetabolites).Select(x => x.mtbltDetails.In_customId).Distinct().OrderBy(x => x))
+            foreach (string mtblid in metaboliteLevels.List_SampleForTissueAndCharge.SelectMany(x => x.ListOfMetabolites).Select(x => x.mtbltDetails.In_customId).Distinct().OrderBy(x => x))
             {
                 //extract all the metabolites with the mtblid custom metabolite ID
-                msMetabolite mtbl = msMetaboliteLevels.List_SampleForTissueAndCharge.SelectMany(x => x.ListOfMetabolites).First(x => x.mtbltDetails.In_customId == mtblid).mtbltDetails;
+                msMetabolite mtbl = metaboliteLevels.List_SampleForTissueAndCharge.SelectMany(x => x.ListOfMetabolites).First(x => x.mtbltDetails.In_customId == mtblid).mtbltDetails;
                 //initialize the list that will store the boxplots
                 rEngineInstance.engine.Evaluate("accumulateBoxplots <- list()");
 
                 //loop over charges
-                foreach (string charge in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct().OrderBy(x => x))
+                foreach (string charge in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct().OrderBy(x => x))
                 {
                     //loop over tissues
-                    foreach (string tissue in msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct().OrderBy(x => x))
+                    foreach (string tissue in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct().OrderBy(x => x))
                     {
                         //set the plot title
                         rEngineInstance.engine.SetSymbol("boxPlotTitleAndYlabel", returnTitleAndYlabelCharacterVector(charge, lastCharge, tissue, firstTissue));
 
                         //if the metabolite has been detected for the given combination of tissue and charge then do the plot
-                        if (msMetaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge && !publicVariables.excludedPhenotypes.Contains(x.Phenotype))
+                        if (metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge && !publicVariables.excludedPhenotypes.Contains(x.Phenotype))
                             .SelectMany(x => x.ListOfMetabolites).Any(x => x.mtbltDetails.In_customId == mtbl.In_customId))
                         {
                             //initialize the assisting variable
@@ -69,7 +69,7 @@ namespace MS_targeted
                             //loop over all the metabolites for tissue and charge and non-ignore phenotypes
                             //in order to fill in the assisting variables
                             //these variables serve for significance symbols in the plot and for where to plce it in the plot
-                            foreach (sampleForTissueAndCharge sftac in msMetaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge && !publicVariables.excludedPhenotypes.Contains(x.Phenotype)))
+                            foreach (sampleForTissueAndCharge sftac in metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge && !publicVariables.excludedPhenotypes.Contains(x.Phenotype)))
                             {
                                 foreach (sampleForTissueAndCharge.parentMetabolite tdm in sftac.ListOfMetabolites.Where(x => x.mtbltDetails.In_customId == mtbl.In_customId))
                                 {
@@ -115,7 +115,7 @@ namespace MS_targeted
                     }
                 }
                 //do the plot
-                rEngineInstance.engine.Evaluate(@"" + printBoxPlotGrid(msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct().Count(), msMetaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct().Count()) +
+                rEngineInstance.engine.Evaluate(@"" + printBoxPlotGrid(metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct().Count(), metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct().Count()) +
                         @"p <- grid.text(""" + mtbl.In_customId + @"_" + mtbl.In_Name + @""", x=unit(130,""mm""), y=unit(225,""mm""), just=c(""left"", ""top""), gp = gpar(fontface=""bold"", fontsize=24, col=""blue""));
                     print(p);");
             }
