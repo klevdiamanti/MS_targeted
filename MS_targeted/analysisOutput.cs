@@ -879,7 +879,7 @@ namespace MS_targeted
                     {
                         if (cdfs.SampleWeight_covariates.Any(x => x.tissue == sw.tissue && x.charge == sw.charge))
                         {
-                            line_to_print += publicVariables.breakCharInFile.ToString() + cdfs.SampleWeight_covariates.First(x => x.tissue == sw.tissue && x.charge == sw.charge).weight;
+                            line_to_print += publicVariables.breakCharInFile.ToString() + cdfs.SampleWeight_covariates.First(x => x.tissue == sw.tissue && x.charge == sw.charge).weight.Imputed;
                         }
                         else
                         {

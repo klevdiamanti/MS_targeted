@@ -17,7 +17,7 @@ namespace MS_targeted
         {
             public string tissue { get; set; }
             public string charge { get; set; }
-            public double weight { get; set; }
+            public imputedValues weight { get; set; }
         }
 
         public void setClinicalDataFromFile(int _id_index, int _phenotype_index, Dictionary<string, int> _sampleweight_covariates, Dictionary<string, int> _categorical_covariates,
@@ -32,7 +32,11 @@ namespace MS_targeted
                 {
                     tissue = kvp_swci.Key.Split('_').First(),
                     charge = kvp_swci.Key.Split('_').Last(),
-                    weight = (string.IsNullOrEmpty(_line.Split(publicVariables.breakCharInFile).ElementAt(kvp_swci.Value))) ? -1 : Convert.ToDouble(_line.Split(publicVariables.breakCharInFile).ElementAt(kvp_swci.Value))
+                    weight = new imputedValues()
+                    {
+                        Non_imputed = (string.IsNullOrEmpty(_line.Split(publicVariables.breakCharInFile).ElementAt(kvp_swci.Value))) ? -1 : Convert.ToDouble(_line.Split(publicVariables.breakCharInFile).ElementAt(kvp_swci.Value)),
+                        Imputed = (string.IsNullOrEmpty(_line.Split(publicVariables.breakCharInFile).ElementAt(kvp_swci.Value))) ? -1 : Convert.ToDouble(_line.Split(publicVariables.breakCharInFile).ElementAt(kvp_swci.Value))
+                    }
                 });
             }
             Categorical_covariates = new Dictionary<string, string>();
@@ -54,7 +58,7 @@ namespace MS_targeted
             }
         }
 
-        public void setClinicalDataFromVariable(string _id, string _phenotype,List<sampleWeight> _losw, Dictionary<string, string> _ccv,
+        public void setClinicalDataFromVariable(string _id, string _phenotype, List<sampleWeight> _losw, Dictionary<string, string> _ccv,
             Dictionary<string,imputedValues> _ncv, Dictionary<string, string> _icv)
         {
             Id = _id;

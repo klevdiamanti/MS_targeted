@@ -25,9 +25,9 @@ namespace MS_targeted
             {
                 name = "sampleweight",
                 value = ((publicVariables.prefixValues.mixed == publicVariables.prefix || publicVariables.prefixValues.gcms == publicVariables.prefix) 
-                    ? clinicalData.List_clinicalData.First(x => x.Id == Id).SampleWeight_covariates.Where(x => x.tissue.ToLower() == Tissue.ToLower()).Average(x => x.weight)
+                    ? clinicalData.List_clinicalData.First(x => x.Id == Id).SampleWeight_covariates.Where(x => x.tissue.ToLower() == Tissue.ToLower()).Average(x => x.weight.Imputed)
                         : clinicalData.List_clinicalData.First(x => x.Id == Id).SampleWeight_covariates
-                            .First(x => x.tissue.ToLower() == Tissue.ToLower() && x.charge.ToLower() == Charge.ToLower()).weight)
+                            .First(x => x.tissue.ToLower() == Tissue.ToLower() && x.charge.ToLower() == Charge.ToLower()).weight.Imputed)
             });
             foreach (KeyValuePair<string, imputedValues> kvp_nv in clinicalData.List_clinicalData.First(x => x.Id == Id).Numerical_covariates)
             {

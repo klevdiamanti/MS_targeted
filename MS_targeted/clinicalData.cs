@@ -137,8 +137,10 @@ namespace MS_targeted
         {
             clinicalDataFS cdf;
             Dictionary<string, imputedValues> numcov;
+            List<clinicalDataFS.sampleWeight> swcov;
             foreach (clinicalDataFS cdfs in listTmp_clinicalDataFS)
             {
+                //Impute numerical covariates
                 numcov = new Dictionary<string, imputedValues>();
                 foreach (KeyValuePair<string, imputedValues> kvp_s_iv in cdfs.Numerical_covariates)
                 {
@@ -174,8 +176,62 @@ namespace MS_targeted
                     }
                 }
 
+                //Impute sample weights
+                swcov = new List<clinicalDataFS.sampleWeight>();
+                foreach (clinicalDataFS.sampleWeight kvp_sw_iv in cdfs.SampleWeight_covariates)
+                {
+                    if (kvp_sw_iv.weight.Non_imputed == -1)
+                    {
+                        if (listTmp_clinicalDataFS.Where(x => x.Phenotype == cdfs.Phenotype).SelectMany(x => x.SampleWeight_covariates)
+                                                                            .Where(x => x.tissue == kvp_sw_iv.tissue && x.charge == kvp_sw_iv.charge)
+                                                                            .Select(x => x.weight.Non_imputed).Count(x => x != -1) == 0)
+                        {
+                            Console.WriteLine(kvp_sw_iv.tissue + " " + kvp_sw_iv.charge + " for phenotype " + cdfs.Phenotype + " could not be imputed! Too few records!");
+                            swcov.Add(new clinicalDataFS.sampleWeight()
+                            {
+                                tissue = kvp_sw_iv.tissue,
+                                charge = kvp_sw_iv.charge,
+                                weight = new imputedValues()
+                                {
+                                    Imputed = -1,
+                                    Non_imputed = -1
+                                }
+                            });
+                        }
+                        else
+                        {
+                            swcov.Add(new clinicalDataFS.sampleWeight()
+                            {
+                                tissue = kvp_sw_iv.tissue,
+                                charge = kvp_sw_iv.charge,
+                                weight = new imputedValues()
+                                {
+                                    Imputed = listTmp_clinicalDataFS.Where(x => x.Phenotype == cdfs.Phenotype).SelectMany(x => x.SampleWeight_covariates)
+                                                                            .Where(x => x.tissue == kvp_sw_iv.tissue && x.charge == kvp_sw_iv.charge)
+                                                                            .Select(x => x.weight.Non_imputed).Where(x => x != -1).Average(),
+                                    Non_imputed = -1
+                                }
+                            });
+                        }
+                    }
+                    else
+                    {
+
+                        swcov.Add(new clinicalDataFS.sampleWeight()
+                        {
+                            tissue = kvp_sw_iv.tissue,
+                            charge = kvp_sw_iv.charge,
+                            weight = new imputedValues()
+                            {
+                                Imputed = kvp_sw_iv.weight.Imputed,
+                                Non_imputed = kvp_sw_iv.weight.Non_imputed
+                            }
+                        });
+                    }
+                }
+
                 cdf = new clinicalDataFS();
-                cdf.setClinicalDataFromVariable(cdfs.Id, cdfs.Phenotype, cdfs.SampleWeight_covariates, cdfs.Categorical_covariates, numcov, cdfs.Ignored_covariates);
+                cdf.setClinicalDataFromVariable(cdfs.Id, cdfs.Phenotype, swcov, cdfs.Categorical_covariates, numcov, cdfs.Ignored_covariates);
                 List_clinicalData.Add(cdf);
             }
         }
