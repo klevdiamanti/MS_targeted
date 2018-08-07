@@ -24,26 +24,25 @@ namespace MS_targeted
                 REngine.SetEnvironmentVariables(rHome: R_HOME);
             }
 
-            if (string.IsNullOrEmpty(rDll) || string.IsNullOrWhiteSpace(rDll))
-            {
-                engine = REngine.GetInstance();
-            }
-            else
-            {
-                engine = REngine.GetInstance(dll: rDll);
-            }
-
             StartupParameter myparameter = new StartupParameter()
             {
                 Interactive = false,
                 Quiet = true,
-                Verbose = true,
+                Verbose = false,
                 Slave = true
             };
 
+            if (string.IsNullOrEmpty(rDll) || string.IsNullOrWhiteSpace(rDll))
+            {
+                engine = REngine.GetInstance(null, true, myparameter);
+            }
+            else
+            {
+                engine = REngine.GetInstance(rDll, true, myparameter);
+            }
+
             // REngine requires explicit initialization.
             // You can set some parameters.
-            engine.Initialize(parameter: myparameter);
             prepareREndgine();
 
             //Re-enable Console printings

@@ -30,19 +30,17 @@ namespace MS_targeted
                 //check if headers of metadata files are equal
                 if (covariate_names.Count != covariate_types.Count)
                 {
-                    Console.WriteLine("Meatdata file contains unequal number of covariates and types!");
-                    Environment.Exit(0);
+                    outputToLog.WriteErrorLine("Meatdata file contains unequal number of covariates and types");
                 }
 
                 for (int i = 0; i < covariate_names.Count; i++)
                 {
                     if (covariate_types[i].ToLower() == "ignore")
                     {
-                        Console.WriteLine("ignored covariate: " + covariate_names[i].ToLower());
+                        outputToLog.WriteWarningLine("ignored covariate: " + covariate_names[i].ToLower());
                         if (ignored_covariates.ContainsKey(covariate_names[i]))
                         {
-                            Console.WriteLine("Covariate " + covariate_names[i] + " already exists! Remove duplicates!");
-                            Environment.Exit(0);
+                            outputToLog.WriteErrorLine("Covariate " + covariate_names[i] + " already exists");
                         }
                         else
                         {
@@ -57,7 +55,7 @@ namespace MS_targeted
                         }
                         else
                         {
-                            Console.WriteLine("ID index had been already set once! Cannot reset it!");
+                            outputToLog.WriteWarningLine("ID index had been already set once! Cannot reset it!");
                         }
                     }
                     else if (covariate_types[i].ToLower() == "decision")
@@ -68,15 +66,14 @@ namespace MS_targeted
                         }
                         else
                         {
-                            Console.WriteLine("Decision index had been already set once! Cannot reset it!");
+                            outputToLog.WriteWarningLine("Decision index had been already set once! Cannot reset it!");
                         }
                     }
                     else if (covariate_types[i].ToLower() == "numeric")
                     {
                         if (numerical_covariates.ContainsKey(covariate_names[i].ToLower()))
                         {
-                            Console.WriteLine("Covariate " + covariate_names[i] + " already exists! Remove duplicates!");
-                            Environment.Exit(0);
+                            outputToLog.WriteErrorLine("Covariate " + covariate_names[i] + " already exists");
                         }
                         else
                         {
@@ -87,8 +84,7 @@ namespace MS_targeted
                     {
                         if (categorical_covariates.ContainsKey(covariate_names[i].ToLower()))
                         {
-                            Console.WriteLine("Covariate " + covariate_names[i] + " already exists! Remove duplicates!");
-                            Environment.Exit(0);
+                            outputToLog.WriteErrorLine("Covariate " + covariate_names[i] + " already exists");
                         }
                         else
                         {
@@ -99,8 +95,7 @@ namespace MS_targeted
                     {
                         if (sampleWeight_covariates.ContainsKey(covariate_names[i].ToLower()))
                         {
-                            Console.WriteLine("Covariate " + covariate_names[i] + " already exists! Remove duplicates!");
-                            Environment.Exit(0);
+                            outputToLog.WriteErrorLine("Covariate " + covariate_names[i] + " already exists");
                         }
                         else
                         {
@@ -109,8 +104,7 @@ namespace MS_targeted
                     }
                     else
                     {
-                        Console.WriteLine("Unknown type " + covariate_types[i] + " covariate!");
-                        Environment.Exit(0);
+                        outputToLog.WriteErrorLine("Unknown type " + covariate_types[i] + " covariate");
                     }
                 }
                 #endregion
@@ -149,7 +143,7 @@ namespace MS_targeted
                         if (listTmp_clinicalDataFS.Where(x => x.Phenotype == cdfs.Phenotype).SelectMany(x => x.Numerical_covariates)
                             .Where(x => x.Key == kvp_s_iv.Key).Select(x => x.Value.Non_imputed).Count(x => x != -1) == 0)
                         {
-                            Console.WriteLine(kvp_s_iv.Key + " for phenotype " + cdfs.Phenotype + " could not be imputed! Too few records!");
+                            outputToLog.WriteWarningLine(kvp_s_iv.Key + " for phenotype " + cdfs.Phenotype + " could not be imputed! Too few records!");
                             numcov.Add(kvp_s_iv.Key, new imputedValues()
                             {
                                 Imputed = 1,
@@ -186,7 +180,7 @@ namespace MS_targeted
                                                                             .Where(x => x.tissue == kvp_sw_iv.tissue && x.charge == kvp_sw_iv.charge)
                                                                             .Select(x => x.weight.Non_imputed).Count(x => x != -1) == 0)
                         {
-                            Console.WriteLine(kvp_sw_iv.tissue + " " + kvp_sw_iv.charge + " for phenotype " + cdfs.Phenotype + " could not be imputed! Too few records!");
+                            outputToLog.WriteWarningLine(kvp_sw_iv.tissue + " " + kvp_sw_iv.charge + " for phenotype " + cdfs.Phenotype + " could not be imputed! Too few records!");
                             swcov.Add(new clinicalDataFS.sampleWeight()
                             {
                                 tissue = kvp_sw_iv.tissue,

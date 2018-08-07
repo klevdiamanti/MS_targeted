@@ -31,16 +31,12 @@ namespace MS_targeted
                 Environment.Exit(0);
             }
 
-            Stopwatch countTime = new Stopwatch();
-            countTime.Start();
-
             Console.WriteLine("setting up input variables, files and folders");
             publicVariables.inputMSFilesDir = args[0];
             publicVariables.clinicalDataFile = args[1];
             publicVariables.databaseFile = args[2];
-            publicVariables.outputDir = args[3];
-            publicVariables.setPrefix(args[4]);
-
+            publicVariables.configurationFile = args[3];
+            publicVariables.outputDir = args[4];
             //set other public variables that depend on the input arguments
             publicVariables.setOtherVariables();
 
@@ -51,8 +47,8 @@ namespace MS_targeted
             clinicalData.Read_ClinicalDataForSamples();
 
             //set number of phenotypic classes
-            outputToLog.WriteLine("setting number of classes");
-            publicVariables.setNumberOfClasses();
+            outputToLog.WriteLine("setting number of phenotypic classes");
+            publicVariables.setNumberOfPhenotypicClasses();
 
             //read the compiled csv files
             outputToLog.WriteLine("reading the compiled csv files");
@@ -66,13 +62,8 @@ namespace MS_targeted
             outputToLog.WriteLine("printing the output files");
             analysisOutput.printTheDetails();
 
-            countTime.Stop();
-            outputToLog.WriteLine(string.Format("Done in {0:00}h {1:00}min {2:00}sec {3:00}msec", countTime.Elapsed.Hours, countTime.Elapsed.Minutes, countTime.Elapsed.Seconds, countTime.Elapsed.Milliseconds / 10));
-
             //close open streams and engines
             publicVariables.Close();
-
-            Console.ReadLine();
         }
     }
 }
