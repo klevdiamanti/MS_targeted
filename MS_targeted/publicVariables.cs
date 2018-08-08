@@ -54,6 +54,10 @@ namespace MS_targeted
         private static string R_DLL { get; set; }
         private static bool R_DLLisSet = false;
 
+        //R_PACKAGES
+        private static string R_packages { get; set; }
+        private static bool R_packagesisSet = false;
+
         //excluded phenotypes
         public static List<string> excludedPhenotypes { get; set; }
         private static bool excludedPhenotypesIsSet = false;
@@ -191,7 +195,7 @@ namespace MS_targeted
                                             {
                                                 breakCharInFile = '\t';
                                                 breakCharInFileIsSet = true;
-                                                outputToLog.WriteLine("FileTabSeparator was successfully set as " + breakCharInFile.ToString());
+                                                outputToLog.WriteLine("FileTabSeparator was successfully set as [tab]");
                                             }
                                             else if (suffix == ".csv")
                                             {
@@ -209,7 +213,14 @@ namespace MS_targeted
                                     else
                                     {
                                         breakCharInFileIsSet = true;
-                                        outputToLog.WriteWarningLine("FileTabSeparator has been already set to " + breakCharInFile.ToString());
+                                        if (breakCharInFile == '\t')
+                                        {
+                                            outputToLog.WriteLine("FileTabSeparator was successfully set as [tab]");
+                                        }
+                                        else
+                                        {
+                                            outputToLog.WriteWarningLine("FileTabSeparator has been already set to " + breakCharInFile.ToString());
+                                        }
                                     }
                                     #endregion
                                 }
@@ -470,13 +481,30 @@ namespace MS_targeted
                                     && !File.Exists(@"" + line.Split('\t').ElementAt(1)))
                                 {
                                     R_DLLisSet = false;
-                                    outputToLog.WriteErrorLine("R_DLL directory does not exist");
+                                    outputToLog.WriteErrorLine("R_DLL file does not exist");
                                 }
                                 else
                                 {
                                     R_DLL = line.Split('\t').ElementAt(1);
                                     R_DLLisSet = true;
                                     outputToLog.WriteLine("R_DLL was successfully set as " + R_DLL);
+                                }
+                                #endregion
+                                break;
+                            case "R_PACKAGES":
+                                #region set R_PACKAGES
+                                if (!string.IsNullOrEmpty(line.Split('\t').ElementAt(1))
+                                    && !string.IsNullOrWhiteSpace(line.Split('\t').ElementAt(1))
+                                    && !Directory.Exists(@"" + line.Split('\t').ElementAt(1)))
+                                {
+                                    R_packagesisSet = false;
+                                    outputToLog.WriteErrorLine("R_PACKAGES directory does not exist");
+                                }
+                                else
+                                {
+                                    R_packages = line.Split('\t').ElementAt(1);
+                                    R_packagesisSet = true;
+                                    outputToLog.WriteLine("R_PACKAGES was successfully set as " + R_packages);
                                 }
                                 #endregion
                                 break;
@@ -723,14 +751,14 @@ namespace MS_targeted
             #endregion
 
             //initialize REngine
-            if (R_HOMEisSet && R_DLLisSet)
+            if (R_HOMEisSet && R_DLLisSet && R_packagesisSet)
             {
-                rEngineInstance.initializeREngine(R_HOME, R_DLL);
+                rEngineInstance.initializeREngine(R_HOME, R_DLL, R_packages);
                 initializeREngineIsSet = true;
             }
             else
             {
-                outputToLog.WriteErrorLine("R_HOME or R_DLL have not been set in the configuration file");
+                outputToLog.WriteErrorLine("R_HOME, R_DLL or R_PACKAGES have not been set in the configuration file");
             }
 
             #region check if initialization were done properly

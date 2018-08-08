@@ -10,7 +10,7 @@ namespace MS_targeted
         {
             if (args.Length == 0)
             {
-                Console.WriteLine("[mono] MS_targeted.exe dir_with_input_files clinical_data_file combined_db_file output_dir prefix");
+                Console.WriteLine("[mono] MS_targeted.exe dir_with_input_files clinical_data_file combined_db_file configuration_file output_dir");
                 Console.WriteLine();
                 Console.WriteLine("This script performs the full analysis of the LC/GCMS data for p-values, correlations, ratios, pathways, database output and ROSETTA datasets.");
                 Console.WriteLine();
@@ -23,11 +23,10 @@ namespace MS_targeted
                 Console.WriteLine("\tfile containing a collection of tab or comma separated values of clinical data for each donor");
                 Console.WriteLine("combined_db_file (string)");
                 Console.WriteLine("\ta tab-separated file containing all the information for pathways, IDs etc. Should be the output from metabolomicsDB.exe");
+                Console.WriteLine("configuration_file (string)");
+                Console.WriteLine("\tconfiguration file for the pipeline");
                 Console.WriteLine("output_dir (string)");
                 Console.WriteLine("\toutput directory");
-                Console.WriteLine("prefix (string)");
-                Console.WriteLine("\tprefix of the files in the input directory.");
-                Console.WriteLine("\tsuggested that as prefix we use lcms, gcms or mixed so that we make the task easier.");
                 Environment.Exit(0);
             }
 

@@ -8,7 +8,7 @@ namespace MS_targeted
     {
         public static REngine engine;
 
-        public static void initializeREngine(string R_HOME, string rDll)
+        public static void initializeREngine(string R_HOME, string R_DLL, string R_packages)
         {
             //block (intercept) REngine from printing to the Console
             //we are just redirecting the output of it to some StringWriter
@@ -28,29 +28,33 @@ namespace MS_targeted
             {
                 Interactive = false,
                 Quiet = true,
-                Verbose = false,
-                Slave = true
+                Verbose = false                
             };
 
-            if (string.IsNullOrEmpty(rDll) || string.IsNullOrWhiteSpace(rDll))
+            if (string.IsNullOrEmpty(R_DLL) || string.IsNullOrWhiteSpace(R_DLL))
             {
-                engine = REngine.GetInstance(null, true, myparameter);
+                engine = REngine.GetInstance(null, true, myparameter, null);
             }
             else
             {
-                engine = REngine.GetInstance(rDll, true, myparameter);
+                engine = REngine.GetInstance(R_DLL, true, myparameter, null);
             }
 
             // REngine requires explicit initialization.
             // You can set some parameters.
-            prepareREndgine();
+            prepareREndgine(R_packages);
 
             //Re-enable Console printings
             Console.SetOut(stdOut);
         }
 
-        private static void prepareREndgine()
+        private static void prepareREndgine(string R_packages)
         {
+            if (!string.IsNullOrEmpty(R_packages) && !string.IsNullOrWhiteSpace(R_packages))
+            {
+                engine.Evaluate(".libPaths(c('" + R_packages + "', .libPaths()))");
+            }
+            
             //load libraries
             engine.Evaluate(@"library(lmPerm); library(ggplot2); library(grid); library(gridExtra); library(coin); library(Hmisc); library(RcmdrMisc);");
 
