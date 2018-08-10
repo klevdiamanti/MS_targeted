@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using metabolomicsDB;
 
 namespace MS_targeted
@@ -42,7 +41,7 @@ namespace MS_targeted
             outputToLog.WriteLine("reading the tab-separated metabolite database file");
             metabolites.Read_metaboliteDatabaseFromFile(publicVariables.databaseFile);
 
-            outputToLog.WriteLine("reading the tab-separated metadata file for the patients");
+            outputToLog.WriteLine("reading the tab-separated metadata file");
             clinicalData.Read_ClinicalDataForSamples();
 
             //set number of phenotypic classes

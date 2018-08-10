@@ -26,87 +26,157 @@ namespace MS_targeted
             using (TextReader input = new StreamReader(@"" + publicVariables.clinicalDataFile))
             {
                 #region set covariate indecies
-                List<string> covariate_names = input.ReadLine().Split('\t').ToList(), covariate_types = input.ReadLine().Split('\t').ToList();
-                //check if headers of metadata files are equal
+                List<string> covariate_names = input.ReadLine().Split(publicVariables.breakCharInFile).Select(x => x.ToLower()).ToList(),
+                    covariate_types = input.ReadLine().Split(publicVariables.breakCharInFile).Select(x => x.ToLower()).ToList();
+
+                #region check headers and types of metadata
                 if (covariate_names.Count != covariate_types.Count)
                 {
                     outputToLog.WriteErrorLine("Meatdata file contains unequal number of covariates and types");
                 }
 
-                for (int i = 0; i < covariate_names.Count; i++)
+                if (covariate_types.Count(x => x != "numeric" && x != "categorical") > 0)
                 {
-                    if (covariate_types[i].ToLower() == "ignore")
-                    {
-                        outputToLog.WriteWarningLine("ignored covariate: " + covariate_names[i].ToLower());
-                        if (ignored_covariates.ContainsKey(covariate_names[i]))
-                        {
-                            outputToLog.WriteErrorLine("Covariate " + covariate_names[i] + " already exists");
-                        }
-                        else
-                        {
-                            ignored_covariates.Add(covariate_names[i].ToLower(), i);
-                        }
-                    }
-                    else if (covariate_types[i].ToLower() == "id")
+                    outputToLog.WriteErrorLine("Meatdata file contains unexpected types of entries. They should be strictly numeric or categorical");
+                }
+
+                if (covariate_names.Count != covariate_names.Distinct().Count())
+                {
+                    outputToLog.WriteErrorLine("Meatdata file contains duplicates in the header. There should be only unique entries");
+                }
+                #endregion
+
+                foreach (string covar_name in covariate_names)
+                {
+                    if (publicVariables.sampleId == covar_name)
                     {
                         if (id_index == -1)
                         {
-                            id_index = i;
+                            id_index = covariate_names.IndexOf(covar_name);
                         }
                         else
                         {
-                            outputToLog.WriteWarningLine("ID index had been already set once! Cannot reset it!");
+                            outputToLog.WriteWarningLine("CovarId index had been already set once. The second entry will be ignored. The metadata/covariates file contains duplicates");
                         }
                     }
-                    else if (covariate_types[i].ToLower() == "decision")
+                    else if (publicVariables.phenotype == covar_name)
                     {
                         if (decision_index == -1)
                         {
-                            decision_index = i;
+                            decision_index = covariate_names.IndexOf(covar_name);
                         }
                         else
                         {
-                            outputToLog.WriteWarningLine("Decision index had been already set once! Cannot reset it!");
+                            outputToLog.WriteWarningLine("CovarDecision index had been already set once. The second entry will be ignored. The metadata/covariates file contains duplicates");
                         }
                     }
-                    else if (covariate_types[i].ToLower() == "numeric")
+                    else if (publicVariables.normCovars.Any(x => x == covar_name))
                     {
-                        if (numerical_covariates.ContainsKey(covariate_names[i].ToLower()))
+                        if (covariate_types.ElementAt(covariate_names.IndexOf(covar_name)) == "numeric")
                         {
-                            outputToLog.WriteErrorLine("Covariate " + covariate_names[i] + " already exists");
+                            numerical_covariates.Add(covar_name, covariate_names.IndexOf(covar_name));
+                        }
+                        else if (covariate_types.ElementAt(covariate_names.IndexOf(covar_name)) == "categorical")
+                        {
+                            categorical_covariates.Add(covar_name, covariate_names.IndexOf(covar_name));
                         }
                         else
                         {
-                            numerical_covariates.Add(covariate_names[i].ToLower(), i);
+                            outputToLog.WriteErrorLine("Meatdata file contains unexpected types of entries. They should be strictly numeric or categorical");
                         }
                     }
-                    else if (covariate_types[i].ToLower() == "categorical")
+                    else if (publicVariables.sampleWeight.Any(x => x.Item1 == covar_name))
                     {
-                        if (categorical_covariates.ContainsKey(covariate_names[i].ToLower()))
+                        if (covariate_types.ElementAt(covariate_names.IndexOf(covar_name)) != "numeric")
                         {
-                            outputToLog.WriteErrorLine("Covariate " + covariate_names[i] + " already exists");
+                            outputToLog.WriteErrorLine("Sample weight columns in the meatdata file should be strictly numeric");
                         }
-                        else
-                        {
-                            categorical_covariates.Add(covariate_names[i].ToLower(), i);
-                        }
-                    }
-                    else if (covariate_types[i].ToLower() == "sampleweight")
-                    {
-                        if (sampleWeight_covariates.ContainsKey(covariate_names[i].ToLower()))
-                        {
-                            outputToLog.WriteErrorLine("Covariate " + covariate_names[i] + " already exists");
-                        }
-                        else
-                        {
-                            sampleWeight_covariates.Add(covariate_names[i].ToLower(), i);
-                        }
+                        sampleWeight_covariates.Add(publicVariables.sampleWeight.Where(x => x.Item1 == covar_name).Select(x => x.Item2 + "_" + x.Item3).First(),
+                            covariate_names.IndexOf(covar_name));
                     }
                     else
                     {
-                        outputToLog.WriteErrorLine("Unknown type " + covariate_types[i] + " covariate");
+                        ignored_covariates.Add(covar_name, covariate_names.IndexOf(covar_name));
+                        outputToLog.WriteWarningLine(covar_name + " was not mentioned in the metadata/covariates file. Assuming ignore");
                     }
                 }
+
+                #region comment out
+                //for (int i = 0; i < covariate_names.Count; i++)
+                //{
+                //    if (covariate_types[i].ToLower() == "ignore")
+                //    {
+                //        outputToLog.WriteWarningLine("ignored covariate: " + covariate_names[i].ToLower());
+                //        if (ignored_covariates.ContainsKey(covariate_names[i]))
+                //        {
+                //            outputToLog.WriteErrorLine("Covariate " + covariate_names[i] + " already exists");
+                //        }
+                //        else
+                //        {
+                //            ignored_covariates.Add(covariate_names[i].ToLower(), i);
+                //        }
+                //    }
+                //    else if (covariate_types[i].ToLower() == "id")
+                //    {
+                //        if (id_index == -1)
+                //        {
+                //            id_index = i;
+                //        }
+                //        else
+                //        {
+                //            outputToLog.WriteWarningLine("ID index had been already set once! Cannot reset it!");
+                //        }
+                //    }
+                //    else if (covariate_types[i].ToLower() == "decision")
+                //    {
+                //        if (decision_index == -1)
+                //        {
+                //            decision_index = i;
+                //        }
+                //        else
+                //        {
+                //            outputToLog.WriteWarningLine("Decision index had been already set once! Cannot reset it!");
+                //        }
+                //    }
+                //    else if (covariate_types[i].ToLower() == "numeric")
+                //    {
+                //        if (numerical_covariates.ContainsKey(covariate_names[i].ToLower()))
+                //        {
+                //            outputToLog.WriteErrorLine("Covariate " + covariate_names[i] + " already exists");
+                //        }
+                //        else
+                //        {
+                //            numerical_covariates.Add(covariate_names[i].ToLower(), i);
+                //        }
+                //    }
+                //    else if (covariate_types[i].ToLower() == "categorical")
+                //    {
+                //        if (categorical_covariates.ContainsKey(covariate_names[i].ToLower()))
+                //        {
+                //            outputToLog.WriteErrorLine("Covariate " + covariate_names[i] + " already exists");
+                //        }
+                //        else
+                //        {
+                //            categorical_covariates.Add(covariate_names[i].ToLower(), i);
+                //        }
+                //    }
+                //    else if (covariate_types[i].ToLower() == "sampleweight")
+                //    {
+                //        if (sampleWeight_covariates.ContainsKey(covariate_names[i].ToLower()))
+                //        {
+                //            outputToLog.WriteErrorLine("Covariate " + covariate_names[i] + " already exists");
+                //        }
+                //        else
+                //        {
+                //            sampleWeight_covariates.Add(covariate_names[i].ToLower(), i);
+                //        }
+                //    }
+                //    else
+                //    {
+                //        outputToLog.WriteErrorLine("Unknown type " + covariate_types[i] + " covariate");
+                //    }
+                //}
+                #endregion
                 #endregion
 
                 string line;

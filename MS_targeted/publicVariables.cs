@@ -66,6 +66,18 @@ namespace MS_targeted
         public static List<string> normCovars { get; set; }
         private static bool normCovarsIsSet = false;
 
+        //sample weight covariates
+        public static List<Tuple<string, string, string>> sampleWeight { get; set; }
+        private static bool sampleWeightIsSet = false;
+
+        //sample ID in metadata file
+        public static string sampleId { get; set; }
+        private static bool sampleIdIsSet = false;
+
+        //decision/phenotype in metadata file
+        public static string phenotype { get; set; }
+        private static bool phenotypeIsSet = false;
+
         //what to print
         public static bool printTheMetaboliteDetails = false;
         public static bool printBoxplots = false;
@@ -86,7 +98,7 @@ namespace MS_targeted
         public enum numberOfClassesValues
         {
             two,
-            three
+            more
         }
         public static numberOfClassesValues numberOfClasses { get; set; }
 
@@ -219,7 +231,7 @@ namespace MS_targeted
                                         }
                                         else
                                         {
-                                            outputToLog.WriteWarningLine("FileTabSeparator has been already set to " + breakCharInFile.ToString());
+                                            outputToLog.WriteLine("FileTabSeparator has been already set to " + breakCharInFile.ToString());
                                         }
                                     }
                                     #endregion
@@ -270,7 +282,7 @@ namespace MS_targeted
                                         {
                                             indexToStartFrom = lineTmp.Split(breakCharInFile).ToList().IndexOf("Metabolite");
                                             indexToStartFromIsSet = true;
-                                            outputToLog.WriteLine("Index of the column where numerical values start was successfully set as " + indexToStartFromIsSet);
+                                            outputToLog.WriteLine("Index of the column where numerical values start was successfully set as " + indexToStartFrom);
                                         }
                                     }
                                 }
@@ -329,11 +341,11 @@ namespace MS_targeted
                                     breakCharInFileIsSet = true;
                                     if (breakCharInFile == '\t')
                                     {
-                                        outputToLog.WriteWarningLine("FileTabSeparator has been already set to [tab]");
+                                        outputToLog.WriteLine("FileTabSeparator has been already set to [tab]");
                                     }
                                     else
                                     {
-                                        outputToLog.WriteWarningLine("FileTabSeparator has been already set to " + breakCharInFile.ToString());
+                                        outputToLog.WriteLine("FileTabSeparator has been already set to " + breakCharInFile.ToString());
                                     }
                                 }
                                 #endregion
@@ -510,14 +522,84 @@ namespace MS_targeted
                                 break;
                             case "ExcludedPhenotypes":
                                 #region set ExcludedPhenotypes
-                                excludedPhenotypes = line.Split('\t').ElementAt(1).Split(',').ToList();
-                                excludedPhenotypesIsSet = true;
+                                if (!string.IsNullOrEmpty(line.Split('\t').ElementAt(1)) && !string.IsNullOrWhiteSpace(line.Split('\t').ElementAt(1)))
+                                {
+                                    excludedPhenotypes = line.Split('\t').ElementAt(1).Split(',').ToList();
+                                    excludedPhenotypesIsSet = true;
+                                    outputToLog.WriteLine("ExcludedPhenotypes was successfully set");
+                                }
+                                else
+                                {
+                                    excludedPhenotypesIsSet = true;
+                                    excludedPhenotypes = new List<string>();
+                                    outputToLog.WriteWarningLine("ExcludedPhenotypes was successfully set as empty");
+                                }
                                 #endregion
                                 break;
-                            case "CorrelationCovariates":
-                                #region set CorrelationCovariates
-                                normCovars = line.Split('\t').ElementAt(1).Split(',').Select(x => x.ToLower()).ToList();
-                                normCovarsIsSet = true;
+                            case "CovarCorrelate":
+                                #region set CovarCorrelate
+                                if (!string.IsNullOrEmpty(line.Split('\t').ElementAt(1)) && !string.IsNullOrWhiteSpace(line.Split('\t').ElementAt(1)))
+                                {
+                                    normCovars = line.Split('\t').ElementAt(1).Split(',').Select(x => x.ToLower()).ToList();
+                                    normCovarsIsSet = true;
+                                    outputToLog.WriteLine("CovarCorrelate was successfully set");
+                                }
+                                else
+                                {
+                                    normCovarsIsSet = true;
+                                    normCovars = new List<string>();
+                                    outputToLog.WriteWarningLine("CovarCorrelate was successfully set as empty");
+                                }
+                                #endregion
+                                break;
+                            case "CovarSampleWeight":
+                                #region set CovarSampleWeight
+                                if (!string.IsNullOrEmpty(line.Split('\t').ElementAt(1)) && !string.IsNullOrWhiteSpace(line.Split('\t').ElementAt(1)))
+                                {
+                                    sampleWeight = line.Split('\t').ElementAt(1).Split(',')
+                                    .Select(x => new Tuple<string, string, string>
+                                    (x.Split('#').First().ToLower(), x.Split('#').Last().Split('_').First().ToLower(), x.Split('#').Last().Split('_').Last().ToLower()))
+                                    .ToList();
+                                    sampleWeightIsSet = true;
+                                    outputToLog.WriteLine("CovarSampleWeight was successfully set");
+                                }
+                                else
+                                {
+                                    sampleWeightIsSet = true;
+                                    sampleWeight = new List<Tuple<string, string, string>>();
+                                    outputToLog.WriteWarningLine("CovarSampleWeight was successfully set as empty");
+                                }
+                                #endregion
+                                break;
+                            case "CovarId":
+                                #region set CovarId
+                                if (!string.IsNullOrEmpty(line.Split('\t').ElementAt(1)) && !string.IsNullOrWhiteSpace(line.Split('\t').ElementAt(1)))
+                                {
+                                    sampleId = line.Split('\t').ElementAt(1).ToLower();
+                                    sampleIdIsSet = true;
+                                    outputToLog.WriteLine("CovarId was successfully set as " + sampleId);
+                                }
+                                else
+                                {
+                                    sampleIdIsSet = false;
+                                    outputToLog.WriteWarningLine("CovarId cannot be set as empty");
+                                }
+                                #endregion
+                                break;
+                            case "CovarDecision":
+                                #region set CovarDecision
+                                if (!string.IsNullOrEmpty(line.Split('\t').ElementAt(1)) && !string.IsNullOrWhiteSpace(line.Split('\t').ElementAt(1)))
+                                {
+                                    phenotype = line.Split('\t').ElementAt(1).ToLower();
+                                    phenotypeIsSet = true;
+                                    outputToLog.WriteLine("CovarDecision was successfully set as " + phenotype);
+                                }
+                                else
+                                {
+                                    phenotypeIsSet = false;
+                                    outputToLog.WriteWarningLine("CovarDecision cannot be set as empty");
+                                }
+                                
                                 #endregion
                                 break;
                             case "PrintMetaboliteDetails":
@@ -788,40 +870,31 @@ namespace MS_targeted
             }
             else if (!excludedPhenotypesIsSet)
             {
-                outputToLog.WriteErrorLine("ExcludedPhenotypes has not been set in the configuration file. It can be empty too");
+                outputToLog.WriteErrorLine("ExcludedPhenotypes has not been set in the configuration file. It can be set to empty/NULL too");
             }
             else if (!normCovarsIsSet)
             {
-                outputToLog.WriteErrorLine("CorrelationCovariates has not been set in the configuration file. It can be empty too");
+                outputToLog.WriteErrorLine("CorrelationCovariates has not been set in the configuration file. It can be set to empty/NULL too");
+            }
+            else if (!sampleWeightIsSet)
+            {
+                outputToLog.WriteErrorLine("CovarSampleWeight has not been set in the configuration file. It can be set to empty/NULL too");
+            }
+            else if (!sampleIdIsSet)
+            {
+                outputToLog.WriteErrorLine("CovarId has not been set in the configuration file");
+            }
+            else if (!phenotypeIsSet)
+            {
+                outputToLog.WriteErrorLine("CovarDecision has not been set in the configuration file");
             }
             else if (!initializeREngineIsSet)
             {
-                outputToLog.WriteErrorLine("REngine coulc not be initialized because R_HOME or R_DLL are not in the configuration file");
+                outputToLog.WriteErrorLine("REngine could not be initialized because R_HOME or R_DLL are not in the configuration file");
             }
             #endregion
-        }
 
-        public static void Close()
-        {
-            rEngineInstance.disposeREngine();
-            outputToLog.closeLogFile();
-        }
-
-        public static void setNumberOfPhenotypicClasses()
-        {
-            switch (clinicalData.List_clinicalData.Select(x => x.Phenotype).Where(x => !excludedPhenotypes.Contains(x)).Distinct().Count())
-            {
-                case 2:
-                    numberOfClasses = numberOfClassesValues.two;
-                    break;
-                case 3:
-                    numberOfClasses = numberOfClassesValues.three;
-                    break;
-                default:
-                    outputToLog.WriteErrorLine("Number of classes was incorrectly defined as " +
-                        clinicalData.List_clinicalData.Select(x => x.Phenotype).Where(x => !excludedPhenotypes.Contains(x)).Distinct().Count().ToString());
-                    break;
-            }
+            checkCovariateInputs();
         }
 
         private static void checkInputFilesAndDirs()
@@ -902,6 +975,85 @@ namespace MS_targeted
                     Environment.Exit(0);
                 }
             }
+        }
+
+        private static void checkCovariateInputs()
+        {
+            #region check for duplicates
+            if (normCovars.Count > 0 && normCovars.Count != normCovars.Distinct().Count())
+            {
+                outputToLog.WriteErrorLine("CovarCorrelate contains duplicates in the configuration file");
+            }
+
+            if (sampleWeight.Count > 0 && sampleWeight.Count != sampleWeight.Select(x => x.Item1).Distinct().Count())
+            {
+                outputToLog.WriteErrorLine("CovarSampleWeight contains duplicates (names before hashtag) in the configuration file");
+            }
+
+            if (sampleWeight.Count > 0 && sampleWeight.Count != sampleWeight.Select(x => x.Item2 + "_" + x.Item3).Distinct().Count())
+            {
+                outputToLog.WriteErrorLine("CovarSampleWeight contains duplicates (names after hashtag) in the configuration file");
+            }
+            #endregion
+
+            #region check sample ID
+            if (sampleId == phenotype)
+            {
+                outputToLog.WriteErrorLine("CovarId cannot be the same as the CovarDecision in the configuration file");
+            }
+
+            if (normCovars.Count > 0 && normCovars.Contains(sampleId))
+            {
+                outputToLog.WriteErrorLine("CovarId cannot be among the CovarCorrelate covariates in the configuration file");
+            }
+
+            if (sampleWeight.Count > 0 && sampleWeight.Any(x => x.Item1 == sampleId))
+            {
+                outputToLog.WriteErrorLine("CovarId cannot be among the CovarSampleWeight covariates in the configuration file");
+            }
+            #endregion
+
+            #region check decision
+            if (normCovars.Count > 0 && normCovars.Contains(phenotype))
+            {
+                outputToLog.WriteErrorLine("CovarDecision cannot be among the CovarCorrelate covariates in the configuration file");
+            }
+
+            if (sampleWeight.Count > 0 && sampleWeight.Any(x => x.Item1 == phenotype))
+            {
+                outputToLog.WriteErrorLine("CovarDecision cannot be among the CovarSampleWeight covariates in the configuration file");
+            }
+            #endregion
+
+            #region check sample weight
+            if (sampleWeight.Count == 0 && normCovars.Contains("sampleweight"))
+            {
+                outputToLog.WriteErrorLine("CovarCorrelate cannot contain sampleWeight as a covariate since it is not defined in the configuration file");
+            }
+            #endregion
+        }
+
+        public static void setNumberOfPhenotypicClasses()
+        {
+            switch (clinicalData.List_clinicalData.Select(x => x.Phenotype).Where(x => !excludedPhenotypes.Contains(x)).Distinct().Count())
+            {
+                case 2:
+                    numberOfClasses = numberOfClassesValues.two;
+                    break;
+                case 3:
+                    numberOfClasses = numberOfClassesValues.more;
+                    break;
+                default:
+                    outputToLog.WriteErrorLine("Number of classes was incorrectly defined as " +
+                        clinicalData.List_clinicalData.Select(x => x.Phenotype).Where(x => !excludedPhenotypes.Contains(x)).Distinct().Count().ToString());
+                    break;
+            }
+        }
+
+        public static void Close()
+        {
+            rEngineInstance.disposeREngine();
+            outputToLog.closeLogFile();
         }
     }
 }

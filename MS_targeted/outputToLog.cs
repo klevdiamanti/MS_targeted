@@ -36,16 +36,18 @@ namespace MS_targeted
 
         public static void WriteErrorLine(string line)
         {
-            Console.WriteLine("ERROR: " + line + "! Exiting!");
-            output.WriteLine(line);
+            string outLine = "ERROR: " + line + "! Exiting!";
+            Console.WriteLine(outLine);
+            output.WriteLine(outLine);
             closeLogFile();
             Environment.Exit(0);
         }
 
         public static void WriteWarningLine(string line)
         {
-            Console.WriteLine("WARNING: " + line + "!");
-            output.WriteLine(line);
+            string outLine = "WARNING: " + line + "!";
+            Console.WriteLine(outLine);
+            output.WriteLine(outLine);
         }
     }
 }

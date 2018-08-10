@@ -21,14 +21,17 @@ namespace MS_targeted
             Phenotype = (clinicalData.List_clinicalData.Any(x => x.Id == Id)) ? clinicalData.List_clinicalData.First(x => x.Id == Id).Phenotype : "U";
 
             ListOfNumClinicalData = new List<numClinicalData>();
-            ListOfNumClinicalData.Add(new numClinicalData()
+            if (clinicalData.List_clinicalData.First(x => x.Id == Id).SampleWeight_covariates.Count != 0)
             {
-                name = "sampleweight",
-                value = ((publicVariables.prefixValues.mixed == publicVariables.prefix || publicVariables.prefixValues.gcms == publicVariables.prefix) 
+                ListOfNumClinicalData.Add(new numClinicalData()
+                {
+                    name = "sampleweight",
+                    value = ((publicVariables.prefixValues.mixed == publicVariables.prefix || publicVariables.prefixValues.gcms == publicVariables.prefix)
                     ? clinicalData.List_clinicalData.First(x => x.Id == Id).SampleWeight_covariates.Where(x => x.tissue.ToLower() == Tissue.ToLower()).Average(x => x.weight.Imputed)
                         : clinicalData.List_clinicalData.First(x => x.Id == Id).SampleWeight_covariates
                             .First(x => x.tissue.ToLower() == Tissue.ToLower() && x.charge.ToLower() == Charge.ToLower()).weight.Imputed)
-            });
+                });
+            }
             foreach (KeyValuePair<string, imputedValues> kvp_nv in clinicalData.List_clinicalData.First(x => x.Id == Id).Numerical_covariates)
             {
                 ListOfNumClinicalData.Add(new numClinicalData()

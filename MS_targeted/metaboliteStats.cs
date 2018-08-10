@@ -298,7 +298,10 @@ namespace MS_targeted
                         }
 
                         //calculate spearman correlations
-                        correlationToCovariatesVals = correlations.correlateMetabsToCovariates(tissue, charge, custid, clinicalDataNames);
+                        if (clinicalDataNames.Count > 0)
+                        {
+                            correlationToCovariatesVals = correlations.correlateMetabsToCovariates(tissue, charge, custid, clinicalDataNames);
+                        }
 
                         foreach (sampleForTissueAndCharge sftac in metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge))
                         {
