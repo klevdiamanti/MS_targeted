@@ -38,7 +38,7 @@ For every tissue a tab- or comm-aseparated file is created. This file contains:
   - Platform: the platform in which the current metabolite was detected (GCMS, LCMS or MIXED)
   - Charge: the charge mode of the platform in which the current metabolite was detected (positive or negative for LCMS, or none for GCMS or MIXED)
 - statistics for the current metabolite
-  - Depending on the number of unique decisions chosen for the pipeline to run on there will be pairs of fold-changes and p-values for the current metabolite. In case of two distinct dicisions there will be only one pair named AvBr and AvBp. A is the initial of one of the distinct decisions and B the initial of the other one. The v in the middle stands for versus and the final r or p imply fold-change or p-value, respectively.
+  - Depending on the number of unique decisions chosen for the pipeline to run on there will be pairs of fold-changes and p-values for the current metabolite. In case of two distinct dicisions there will be only one pair named AtoBfc and AtoBpv. A is the initial letter of one of the distinct decisions and B the initial letter of the other one. The to implies the transition from one decision to the other one, and the final fc or pv imply fold-change or p-value, respectively. In case of three decisions, three pair-wise comparisons will be performed, hence there will be: AtoBfc and AtoBpv, AtoCfc and AtoCpv, and BtoCfc and BtoCpv.
 - public database and local identifiers for the current metabolite
   - CAS: CAS id of the current metabolite
   - HMDB: Human Metabolome Database id of the current metabolite
