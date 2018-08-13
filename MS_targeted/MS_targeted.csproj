@@ -76,12 +76,20 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+    <None Include="sample_data\conf\MS_targeted.conf" />
+    <None Include="sample_data\db\20171204_metabolites_db.tsv.zip" />
+    <None Include="sample_data\input_ms\gcms_adams_plasma.tsv" />
+    <None Include="sample_data\metadata\gcms_fiehn_metadata.tsv" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\metabolomicsDB\metabolomicsDB.csproj">
       <Project>{5285a509-2a11-4166-b559-7297f62e0640}</Project>
       <Name>metabolomicsDB</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="exec\MS_targeted.exe" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
