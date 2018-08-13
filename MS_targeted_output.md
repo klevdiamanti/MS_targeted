@@ -40,10 +40,10 @@ For every tissue a tab- or comm-aseparated file is created. This file contains:
 - statistics for the current metabolite
   - Depending on the number of unique decisions chosen for the pipeline to run on there will be pairs of fold-changes and p-values for the current metabolite. In case of two distinct dicisions there will be only one pair named AvBr and AvBp. A is the initial of one of the distinct decisions and B the initial of the other one. The v in the middle stands for versus and the final r or p imply fold-change or p-value, respectively.
 - public database and local identifiers for the current metabolite
-  - CAS
-  - HMDB
-  - KEGG
-  - ChEBI
-  - PubChem
-  - CustID
-  - Genes
+  - CAS: CAS id of the current metabolite
+  - HMDB: Human Metabolome Database id of the current metabolite
+  - KEGG: Kyoto Encyclopedia of Genes and Genomes id of the current metabolite
+  - ChEBI: Chemical Entities of Biological Interest id of the current metabolite
+  - PubChem: PubChem id of the current metabolite
+  - CustID: Custom id given by the user in the input files of metabolite intensities
+  - Genes: Genes involved in the pathway with the current SubPathwayID that the current is involved in
