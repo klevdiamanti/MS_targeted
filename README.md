@@ -10,6 +10,7 @@ MS_targeted can handle multiple tissues and charges simultaneously.
 - The R packages lmPerm, coin, gridExtra, ggplot2, Hmisc and RcmdrMisc are required to be installed.
 - MS_targeted will not run with R 3.5.X due to incompatibilities of the RDotNet package with the latest version of R.
 - You will need to decompress the [database file](MS_targeted/sample_data/db/20171204_metabolites_db.tsv.zip) prior to running the pipeline.
+- Detailed explanation of the output files is provided in [MS_targeted_output.md](MS_targeted_output.md).
 
 ## Run MS_tageted
 ```
@@ -17,7 +18,7 @@ MS_targeted can handle multiple tissues and charges simultaneously.
 ```
 Prior to running MS_targeted you will need to structure the metadata (covariates) and mass spectrometry input data according to the [sample files](MS_targeted/sample_data/) provided. The sample data have been taken from the metabolomics workbench study ST000383 (Fiehn et al., 2010).
 #### input_ms_dir
-Directory where the input mass spectrometry data are stored in plain text comma-separated or tab-separated files. All the input files should have the same prefic prior to the first underscore (_) and the the extension. The various database id for each metabolite you can set them in the input files. We suggest that you have one file for each tissue. Please check [MS_targeted/sample_data/input_ms/](MS_targeted/sample_data/input_ms/) for an example.
+Directory where the input mass spectrometry data are stored in plain text comma-separated or tab-separated files. All the input files should have the same prefic prior to the first underscore (_) and the extension. The various database id for each metabolite you can set them in the input files. We suggest that you have one file for each tissue. Please check [MS_targeted/sample_data/input_ms/](MS_targeted/sample_data/input_ms/) for an example.
 Note that it is required that you have one custom id for every metabolite, that is defined in the row AZm_id. These id's should contain at least one letter.
 #### clinical_data_file
 File where the metadata or covariates for the samples are stored. This is a plain text file preferably tab-delimited. In the first row the unique names for each covariate should be mentioned. In the next row the type of the covariate should be mentioned (exclusively categorical or numeric). Please check [MS_targeted/sample_data/metadata/](MS_targeted/sample_data/metadata/) for an example.
