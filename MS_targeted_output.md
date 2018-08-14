@@ -98,3 +98,38 @@ This is an optionally created directory named machine_learning_datasets, and is 
 
 ## output for MoDentify
 This is an optionally created directory named MoDentify, and is controlled from the setting *PrintOutputForMoDentify* in the configuration file. The files contain pre-compiled set of data files that can be plugged-in to the recently developed R packaage MoDentify that examines whether metabolites from various tissues are correlated to the decision/phenotype individually or as members of modules. MoDentify also examines intra- or inter-tissue correlations of metabolites using Gaussian graphical models. The pre-compiled tab- or comma-seprated set of data files consists of:
+1. MoDentify_AZm_annotations.tsv
+  
+   This is a tab- or comma-separated file that contains various metadata for the metabolites from the provided input files. The file is designed in such a way so that it represents metabolites from various tissues. The following columns are present:
+   - mID: custom id given by the user in the input files of metabolite intensities 
+   - tmID: tissue name followed by '::' and the custom id given by the user in the input files of metabolite intensities 
+   - HmdbID: HMDB id of the current metabolite
+   - HmdbSecondaryID: list of HMDB ids' separated by the '|' column
+   - mName: biochemichal (common) name of the metabolite as provided by the user in the input files of metabolite intensities
+   - HmdbName: HMDB biochemichal (common) name of the metabolite
+   - mHmdbName: manually curated biochemichal (common) name of the metabolite
+   - tmHmdbName: tissue name followed by '::' and the manually curated biochemichal (common) name of the metabolite
+   - mSuperClass
+   - tmSuperClass
+   - mClass
+   - tmClass
+   - HmdbDirectParent
+   - tHmdbDirectParent
+   - HmdbKingdom
+   - tHmdbKingdom
+   - HmdbSuperClass
+   - tHmdbSuperClass
+   - mHmdbSuperClass
+   - tmHmdbSuperClass
+   - HmdbClass
+   - tHmdbClass
+   - mHmdbClass
+   - tmHmdbClass
+   - mPlatform
+   - mCharge
+2. MoDentify_AZm_data.tsv
+
+   hahaha
+3. MoDentify_AZm_phenotypes.tsv
+
+   kokoko
