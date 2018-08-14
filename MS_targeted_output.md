@@ -100,7 +100,7 @@ This is an optionally created directory named machine_learning_datasets, and is 
 This is an optionally created directory named MoDentify, and is controlled from the setting *PrintOutputForMoDentify* in the configuration file. The files contain pre-compiled set of data files that can be plugged-in to the recently developed R packaage MoDentify that examines whether metabolites from various tissues are correlated to the decision/phenotype individually or as members of modules. MoDentify also examines intra- or inter-tissue correlations of metabolites using Gaussian graphical models. The pre-compiled tab- or comma-seprated set of data files consists of:
 1. MoDentify_AZm_annotations.tsv
   
-   This is a tab- or comma-separated file that contains various metadata for the metabolites from the provided input files. The file is designed in such a way so that it represents metabolites from various tissues. The following columns are present:
+   This is a tab- or comma-separated file that contains various metadata for the metabolites from the provided input files. The file is designed in such a way so that it represents metabolites from various tissues. In multiple columns we use the tissue name follow by two consecutive colons '::'. This is done in order to introduce uniqueness for the combination of tissues and metabolites. Keep in mind potential metabolite introduced by not removing duplicate metabolites from the same tissue and charge mode. The following columns are present:
    - mID: custom id given by the user in the input files of metabolite intensities 
    - tmID: tissue name followed by '::' and the custom id given by the user in the input files of metabolite intensities 
    - HmdbID: HMDB id of the current metabolite
@@ -109,27 +109,29 @@ This is an optionally created directory named MoDentify, and is controlled from 
    - HmdbName: HMDB biochemichal (common) name of the metabolite
    - mHmdbName: manually curated biochemichal (common) name of the metabolite
    - tmHmdbName: tissue name followed by '::' and the manually curated biochemichal (common) name of the metabolite
-   - mSuperClass
-   - tmSuperClass
-   - mClass
-   - tmClass
-   - HmdbDirectParent
-   - tHmdbDirectParent
-   - HmdbKingdom
-   - tHmdbKingdom
-   - HmdbSuperClass
-   - tHmdbSuperClass
-   - mHmdbSuperClass
-   - tmHmdbSuperClass
-   - HmdbClass
-   - tHmdbClass
-   - mHmdbClass
-   - tmHmdbClass
-   - mPlatform
-   - mCharge
+   - mSuperClass: custom super class/taxa defined by the user in the input files of metabolite intensities
+   - tmSuperClass: tissue name followed by '::' and the custom super class/taxa defined by the user in the input files of metabolite intensities
+   - mClass: custom class/taxa defined by the user in the input files of metabolite intensities
+   - tmClass: tissue name followed by '::' and the custom class/taxa defined by the user in the input files of metabolite intensities
+   - HmdbDirectParent: direct parent of the metabolite as defined by HMDB
+   - tHmdbDirectParent: tissue name followed by '::' and the direct parent of the metabolite as defined by HMDB
+   - HmdbKingdom: metabolite kingdom as defined by HMDB
+   - tHmdbKingdom: tissue name followed by '::' and the metabolite kingdom as defined by HMDB
+   - HmdbSuperClass: super class/taxa of the metabolite as defined by HMDB
+   - tHmdbSuperClass: tissue name followed by '::' and the super class/taxa of the metabolite as defined by HMDB
+   - mHmdbSuperClass: super class/taxa of the metabolite as manually curated according to HMDB
+   - tmHmdbSuperClass: tissue name followed by '::' and the super class/taxa of the metabolite as manually curated according to HMDB
+   - HmdbClass: class/taxa of the metabolite as defined by HMDB
+   - tHmdbClass: tissue name followed by '::' and the class/taxa of the metabolite as defined by HMDB
+   - mHmdbClass: class/taxa of the metabolite as manually curated according to HMDB
+   - tmHmdbClass: tissue name followed by '::' and the class/taxa of the metabolite as manually curated according to HMDB
+   - mPlatform: platform where the metabolite was detected (LCMS, GCMS or MIXED)
+   - mCharge: charge mode in which the metabolite was detected (positive or negative for LCMS; none for GCMS and MIXED)
 2. MoDentify_AZm_data.tsv
 
-   hahaha
+   A matrix that contains the individual metabolite values for each patient in each tissue is the rows. The top row contains a combination of the tissue name followed by '::' and the manually curated biochemichal (common) name of the metabolite. The second row from the top contains a combination of the tissue name followed by '::' and the custom id given by the user in the input files of metabolite intensities. The leftmost column contains the decision/phenotype chosen by the user in the configuration file. The next column contains the sample ids. The rest of the matrix simply contains the metabolite values given by the user in the input files of metabolite intensities.
+   
+   Note that there might not be unqiue combinations of tissue and biochemical name, and tissue and metabolite custom id. In such cases we recommend you modify the names or ids in order to include them in the future analysis, or remove the corresponding columns to exclude them from the analysis.
 3. MoDentify_AZm_phenotypes.tsv
 
-   kokoko
+   A tab- or comma-separated files that contains the metadata/covariate values for each sample including the decision/phenotype.
