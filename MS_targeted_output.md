@@ -4,7 +4,7 @@
 **For detailed explanation of the input files and examples please check [MS_targeted_input.md](MS_targeted_input.md)**
 
 ## log file
-MS_targeted prints a log file that contains the configuration of the pipeline and some of the key steps. The log file is located under the output_dir and its name is set in the configuration file.
+MS_targeted prints a log file that contains the configuration of the pipeline and some of the key steps. The log file is located under the output_dir and its name is set in the [configuration file](MS_targeted/sample_data/conf/MS_targeted.conf).
 
 ## metabolite details
 This file is optionally printed, and is controlled from the setting *PrintMetaboliteDetails* in the configuration file.
