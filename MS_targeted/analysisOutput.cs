@@ -112,13 +112,13 @@ namespace MS_targeted
             if (publicVariables.printRosettaDatasets)
             {
                 //print rosetta datasets
-                string rosettaDatasetsDirectory = Path.Combine(publicVariables.outputDir, "rosetta_datasets");
+                string rosettaDatasetsDirectory = Path.Combine(publicVariables.outputDir, "machine_learning_datasets");
                 if (Directory.Exists(@"" + rosettaDatasetsDirectory))
                 {
                     Directory.Delete(@"" + rosettaDatasetsDirectory, true);
                 }
                 Directory.CreateDirectory(@"" + rosettaDatasetsDirectory);
-                string rosettaDatasetImputeFile = Path.Combine(rosettaDatasetsDirectory, "rosetta_dataset");
+                string rosettaDatasetImputeFile = Path.Combine(rosettaDatasetsDirectory, "machine_learning_dataset");
                 printRosettaDatasets(rosettaDatasetImputeFile);
             }
 
@@ -216,10 +216,10 @@ namespace MS_targeted
                     pairwiseTest = (publicVariables.numberOfClasses == publicVariables.numberOfClassesValues.two) ? "" : "pVal" + publicVariables.breakCharInFile;
                     for (int i = 0; i < metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.Count; i++)
                     {
-                        pairwiseTest += metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "v" +
-                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "r" + publicVariables.breakCharInFile +
-                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "v" +
-                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "p" + publicVariables.breakCharInFile;
+                        pairwiseTest += metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "to" +
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "fc" + publicVariables.breakCharInFile +
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "to" +
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "pv" + publicVariables.breakCharInFile;
                     }
                     pairwiseTest = pairwiseTest.Substring(0, pairwiseTest.Length - 1);
 
@@ -651,17 +651,18 @@ namespace MS_targeted
                         //HEADER
                         listOfCustId = metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge).SelectMany(x => x.ListOfMetabolites)
                             .Select(x => x.mtbltDetails).Select(x => x.In_customId).Distinct().ToList();
-                        output.WriteLine(string.Join(publicVariables.breakCharInFile.ToString(), listOfCustId) + publicVariables.breakCharInFile + "Phenotype");
-                        //output.WriteLine(string.Join(publicVariables.breakCharInFile.ToString(), Enumerable.Repeat("float(0)", listOfCustId.Count)) + publicVariables.breakCharInFile + "string");
-
+                        output.WriteLine("ID" + publicVariables.breakCharInFile + 
+                            string.Join(publicVariables.breakCharInFile.ToString(), listOfCustId) + publicVariables.breakCharInFile + "Phenotype");
                         //BODY
                         foreach (sampleForTissueAndCharge sftac in metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge))
                         {
                             if (!publicVariables.excludedPhenotypes.Contains(sftac.Phenotype))
                             {
+                                output.Write(sftac.Id + publicVariables.breakCharInFile.ToString());
                                 foreach (string cid in listOfCustId)
                                 {
-                                    output.Write(sftac.ListOfMetabolites.First(x => x.mtbltDetails.In_customId == cid).mtbltVals.Imputed.ToString() + publicVariables.breakCharInFile.ToString());
+                                    output.Write(sftac.ListOfMetabolites.First(x => x.mtbltDetails.In_customId == cid).mtbltVals.Imputed.ToString() 
+                                        + publicVariables.breakCharInFile.ToString());
                                 }
                                 output.WriteLine(sftac.Phenotype);
                             }
@@ -782,9 +783,9 @@ namespace MS_targeted
             {
                 //Header
                 output.WriteLine(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}{0}{14}{0}{15}{0}{16}{0}{17}{0}{18}{0}{19}{0}{20}{0}{21}{0}{22}{0}{23}{0}{24}{0}{25}{0}{26}",
-                        publicVariables.breakCharInFile.ToString(), "AZmID", "tAZmID", "HmdbID", "HmdbSecondaryID", "AZmName", "HmdbName", "AZmHmdbName", "tAZmHmdbName",
-                        "AZmSuperClass", "tAZmSuperClass", "AZmClass", "tAZmClass", "HmdbDirectParent", "tHmdbDirectParent", "HmdbKingdom", "tHmdbKingdom", "HmdbSuperClass",
-                        "tHmdbSuperClass", "AZmHmdbSuperClass", "tAZmHmdbSuperClass", "HmdbClass", "tHmdbClass", "AZmHmdbClass", "tAZmHmdbClass", "AZmPlatform", "AZmCharge"));
+                        publicVariables.breakCharInFile.ToString(), "mID", "tmID", "HmdbID", "HmdbSecondaryID", "mName", "HmdbName", "mHmdbName", "tmHmdbName",
+                        "mSuperClass", "tmSuperClass", "mClass", "tmClass", "HmdbDirectParent", "tHmdbDirectParent", "HmdbKingdom", "tHmdbKingdom", "HmdbSuperClass",
+                        "tHmdbSuperClass", "mHmdbSuperClass", "tmHmdbSuperClass", "HmdbClass", "tHmdbClass", "mHmdbClass", "tmHmdbClass", "mPlatform", "mCharge"));
 
                 //Body
                 string cSuperClass = "", cTClass = "";

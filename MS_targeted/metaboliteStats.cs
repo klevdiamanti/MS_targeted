@@ -294,7 +294,7 @@ namespace MS_targeted
                         foreach (normalizationVals nv in listOfNormValues)
                         {
                             permutationTest.returnIEnurableNumeric(nv.listOfVals.Select(x => x.Value.ToArray()).ToList(), metabolite_values);
-                            regressionVals.Add(permutationTest.linearRegressionTest(new string[] { nv.covarName, custid }));
+                            regressionVals.Add(permutationTest.linearRegressionTest(new string[] { nv.covarName, custid }, "number"));
                         }
 
                         //calculate spearman correlations

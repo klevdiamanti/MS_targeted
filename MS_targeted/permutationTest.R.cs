@@ -102,7 +102,7 @@ namespace MS_targeted
             return Math.Round(wmw_pValue, 5);
         }
 
-        public static msMetabolite.stats.regressValues linearRegressionTest(string[] columnNames)
+        public static msMetabolite.stats.regressValues linearRegressionTest(string[] columnNames, string _typeof)
         {
             //block (intercept) REngine from printing to the Console
             //we are just redirecting the output of it to some StringWriter
@@ -118,17 +118,38 @@ namespace MS_targeted
             //in case we want to use Exact the we should change the limit of Exact from 10 to something greater by using maxExact = X (where X>10)
             //nCycle performs  a  complete  random  permutation,  instead  of  pairwise  exchanges, every nCycle cycles
             //run permutation test and take the pvalue
-            rEngineInstance.engine.Evaluate(string.Format("myres <- summary(lmp(as.numeric(df[,'{1}']) ~ as.numeric(df[,'{0}']), perm = \"{2}\", seqs = {3}, " +
-                "center = {4}, projections = {5}, qr = {6}, maxIter = {7}, nCycle = {8}))",
-                columnNames[1],
-                columnNames[0],
-                "Prob",
-                "TRUE",
-                "TRUE",
-                "TRUE",
-                "TRUE",
-                publicVariables.numberOfPermutations,
-                (publicVariables.numberOfPermutations / 1000).ToString()));
+            if (_typeof == "factor")
+            {
+                rEngineInstance.engine.Evaluate(string.Format("myres <- summary(lmp(as.numeric(df[,'{1}']) ~ as.factor(df[,'{0}']), perm = \"{2}\", seqs = {3}, " +
+                    "center = {4}, projections = {5}, qr = {6}, maxIter = {7}, nCycle = {8}))",
+                        columnNames[1],
+                        columnNames[0],
+                        "Prob",
+                        "TRUE",
+                        "TRUE",
+                        "TRUE",
+                        "TRUE",
+                        publicVariables.numberOfPermutations,
+                        (publicVariables.numberOfPermutations / 1000).ToString()));
+            }
+            else if (_typeof == "number")
+            {
+                rEngineInstance.engine.Evaluate(string.Format("myres <- summary(lmp(as.numeric(df[,'{1}']) ~ as.numeric(df[,'{0}']), perm = \"{2}\", seqs = {3}, " +
+                    "center = {4}, projections = {5}, qr = {6}, maxIter = {7}, nCycle = {8}))",
+                        columnNames[1],
+                        columnNames[0],
+                        "Prob",
+                        "TRUE",
+                        "TRUE",
+                        "TRUE",
+                        "TRUE",
+                        publicVariables.numberOfPermutations,
+                        (publicVariables.numberOfPermutations / 1000).ToString()));
+            }
+            else
+            {
+
+            }
 
             //Re-enable Console printings
             Console.SetOut(stdOut);
