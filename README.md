@@ -10,6 +10,7 @@ MS_targeted can handle multiple tissues and charges simultaneously.
 - The R packages lmPerm, coin, gridExtra, ggplot2, Hmisc and RcmdrMisc are required to be installed.
 - MS_targeted will not run with R 3.5.X due to incompatibilities of the RDotNet package with the latest version of R.
 - You will need to decompress the [database file](MS_targeted/sample_data/db/20171204_metabolites_db.tsv.zip) prior to running the pipeline.
+- Detailed explanation of the input files and options is provided in [MS_targeted_input.md](MS_targeted_input.md).
 - Detailed explanation of the output files is provided in [MS_targeted_output.md](MS_targeted_output.md).
 
 ## Run MS_tageted
