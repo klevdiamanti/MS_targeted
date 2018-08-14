@@ -1,7 +1,7 @@
 
 # MS_targeted output files
 
-**For detailed explanation of the input files and examples please check MS_targeted_input.md**
+**For detailed explanation of the input files and examples please check [MS_targeted_input.md](MS_targeted_input.md)**
 
 ## log file
 MS_targeted prints a log file that contains the configuration of the pipeline and some of the key steps. The log file is located under the output_dir and its name is set in the configuration file.
@@ -97,3 +97,8 @@ This is an optionally created directory named metab_to_metab_correlations, and i
 
 For every tissue two tab- or comma-separated file are created. One named \*corrValue\* contains the Spearman correlation r values for every pair of metabolites. The other one named \*pValueAdjust\* contains the Spearman correlation Benjamini-Hochberg adjusted p-values for every pair of metabolites. This file contains in every row and in every row the same sequence of a metabolites. The top row and leftmost column contain the biochemical (common) names of each metabolite. The second row from the top and the second leftmost row contain the custom id given by the user in the input files of metabolite intensities. The rest of the file is a NxN matrix (where N is the number of unique input metabolites) filled with the respective r values or BH adjusted p-values.
 
+## machine learning datasets
+This is an optionally created directory named machine_learning_datasets, and is controlled from the setting *PrintMachineLearningDatasets* in the configuration file. The files contain pre-compiled data that can be plugged-in to any machine learnng algorithm in your preferred tool (e.g. R, Weka). The files is tab- or comma-separated and consist of a header line that contains the ID of the sample, the biochemical (common) names of the metabolites and the decision.
+
+## output for MoDentify
+This is an optionally created directory named MoDentify, and is controlled from the setting *PrintOutputForMoDentify* in the configuration file. The files contain pre-compiled set of data files that can be plugged-in to the recently developed R packaage MoDentify that examines whether metabolites from various tissues are correlated to the decision/phenotype individually or as members of modules. MoDentify also examines intra- or inter-tissue correlations of metabolites using Gaussian graphical models. The pre-compiled tab- or comma-seprated set of data files consists of:
