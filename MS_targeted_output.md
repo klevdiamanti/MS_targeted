@@ -6,6 +6,8 @@
 **Files used in this section:**
 - [metadata file](MS_targeted/sample_data/metadata/gcms_fiehn_metadata.tsv)
 - [configuration file](MS_targeted/sample_data/conf/MS_targeted.conf)
+- [input ms data file](MS_targeted/sample_data/input_ms/gcms_adams_plasma.tsv)
+- [MS_targeted custom database file](MS_targeted/sample_data/db/20171204_metabolites_db.tsv.zip)
 
 ## log file
 MS_targeted prints a log file that contains the configuration of the pipeline and some of the key steps. The log file is located under the 'output_dir' and its name is set in the configuration file.
