@@ -3,27 +3,21 @@
 
 **For detailed explanation of the input files and examples please check [MS_targeted_input.md](MS_targeted_input.md)**
 
+**Files used in this section:**
+- [metadata file](MS_targeted/sample_data/metadata/gcms_fiehn_metadata.tsv)
+- [configuration file](MS_targeted/sample_data/conf/MS_targeted.conf)
+
 ## log file
-MS_targeted prints a log file that contains the configuration of the pipeline and some of the key steps. The log file is located under the output_dir and its name is set in the [configuration file](MS_targeted/sample_data/conf/MS_targeted.conf).
+MS_targeted prints a log file that contains the configuration of the pipeline and some of the key steps. The log file is located under the 'output_dir' and its name is set in the configuration file.
 
 ## metabolite details
-This file is optionally printed, and is controlled from the setting *PrintMetaboliteDetails* in the configuration file.
-
-It is a tab- or comma-separated file that contains a collection of various database identifiers and pathways for the collection of unique metabolites provided from the input.
+This file is optionally printed as 'metabolites.tsv' under 'output_dir', and is controlled from the setting *PrintMetaboliteDetails* in the configuration file. It is a tab- or comma-separated file that contains a collection of various database identifiers and pathways for the collection of unique metabolites provided from the input.
 
 ## boxplots
-This is an optionally created directory named boxplots, and is controlled from the setting *PrintBoxplots* in the configuration file.
-
-This is a pdf file that illustrates in boxplots the levels of each metabolite for a categorical covariates from the metadata file. Every metabolite is printed in a separate page. The covairiate is selected in the configuration file in the setting *CovarCorrelate*. Only the selected categorical covariates are used for boxplots.
-
-For every combination of tissue, charge and covariate a separate pdf file is created.
+This is an optionally created directory named 'boxplots', and is controlled from the setting *PrintBoxplots* in the configuration file. This is a pdf file that illustrates in boxplots the levels of each metabolite for a categorical covariates from the metadata file. Every metabolite is printed in a separate page. The covariate is selected in the configuration file in the setting *CovarCorrelate*. Only the selected categorical covariates are used for boxplots. For every combination of tissue, charge and covariate a separate pdf file is created.
 
 ## scatterplots
-This is an optionally created directory named scatterplots, and is controlled from the setting *PrintScatterplots* in the configuration file.
-
-This is a pdf file that illustrates in scatterplots the correlation of each metabolite for a numerical covariates from the metadata file. Every metabolite is printed in a separate page. The covairiate is selected in the configuration file in the setting *CovarCorrelate*. Only the selected numerical covariates are used for scatterplots.
-
-For every combination of tissue, charge and covariate a separate pdf file is created.
+This is an optionally created directory named 'scatterplot', and is controlled from the setting *PrintScatterplots* in the configuration file. This is a pdf file that illustrates in scatterplots the correlation of each metabolite for a numerical covariates from the metadata file. Every metabolite is printed in a separate page. The covariate is selected in the configuration file in the setting *CovarCorrelate*. Only the selected numerical covariates are used for scatterplots. For every combination of tissue, charge and covariate a separate pdf file is created.
 
 ## pathways
 This is an optionally created directory named pathway_significance, and is controlled from the setting *PrintPathwaysForMetabolites* in the configuration file. The files contain information about pathways enriched for metabolites from the input data.
