@@ -10,7 +10,7 @@
 - [MS_targeted custom database file](MS_targeted/sample_data/db/20171204_metabolites_db.tsv.zip)
 
 **Output file-formats and directories in this sectiom**
-- [log file](https://github.com/klevdiamanti/MS_targeted/blob/master/MS_targeted_output.md#log_file)
+- [log file](https://github.com/klevdiamanti/MS_targeted/blob/master/MS_targeted_output.md#log)
 - [pathways](https://github.com/klevdiamanti/MS_targeted/blob/master/MS_targeted_output.md#pathways)
 
 ## log file
