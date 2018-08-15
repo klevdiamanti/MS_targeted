@@ -15,7 +15,7 @@
 - [correlation of metabolites to covariates](https://github.com/klevdiamanti/MS_targeted/blob/master/MS_targeted_output.md#correlation-of-metabolites-to-covariates)
 - [correlation of metabolites to metabolites](https://github.com/klevdiamanti/MS_targeted/blob/master/MS_targeted_output.md#correlation-of-metabolites-to-metabolites)
 - [machine learning datasets](https://github.com/klevdiamanti/MS_targeted/blob/master/MS_targeted_output.md#machine-learning-datasets)
-- [output for MoDentify](https://github.com/klevdiamanti/MS_targeted/blob/master/MS_targeted_output.md#output-for-MoDentify)
+- [output for MoDentify](https://github.com/klevdiamanti/MS_targeted/blob/master/MS_targeted_output.md#output-for-modentify)
 
 **Files used in this section:**
 - [input ms data file](MS_targeted/sample_data/input_ms/gcms_adams_plasma.tsv)
