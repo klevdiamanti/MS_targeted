@@ -9,6 +9,10 @@
 - [configuration file](MS_targeted/sample_data/conf/MS_targeted.conf)
 - [MS_targeted custom database file](MS_targeted/sample_data/db/20171204_metabolites_db.tsv.zip)
 
+**Output file-formats and directories in this sectiom**
+- [log file](https://github.com/klevdiamanti/MS_targeted/blob/master/MS_targeted_output.md#log_file)
+- [pathways](https://github.com/klevdiamanti/MS_targeted/blob/master/MS_targeted_output.md#pathways)
+
 ## log file
 MS_targeted prints a log file that contains the configuration of the pipeline and some of the key steps. The log file is located under the 'output_dir' and its name is set in the configuration file.
 
