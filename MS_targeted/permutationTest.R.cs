@@ -44,6 +44,34 @@ namespace MS_targeted
             return Math.Round(aovp_pValue, 5);
         }
 
+        public static double ttestPermutationTest(string[] columnNames)
+        {
+            //block (intercept) REngine from printing to the Console
+            //we are just redirecting the output of it to some StringWriter
+            var stdOut = Console.Out;
+            Console.SetOut(new StringWriter());
+
+            //create the data frame
+            DataFrame df = rEngineInstance.engine.CreateDataFrame(dataFrameValues, columnNames: columnNames);
+            rEngineInstance.engine.SetSymbol("df", df);
+
+            //This permutation T test is quite slow. It run 1000 permutations in approximately 1 second.
+            //Run permutation test and take the pvalue
+            double ttest_pValue = rEngineInstance.engine.Evaluate(string.Format("perm.t.test(as.numeric(df[,'{0}']) ~ as.factor(df[,'{1}']), paired = {2}, " +
+                "alternative = \"{3}\", nperm = {4}, progress = {5})$p.value",
+                columnNames[1],
+                columnNames[0],
+                "FALSE",
+                "two.sided",
+                publicVariables.numberOfPermutations,
+                "FALSE")).AsNumeric().First();
+
+            //Re-enable Console printings
+            Console.SetOut(stdOut);
+
+            return Math.Round(ttest_pValue, 5);
+        }
+
         public static double kruskalWallisPermutationTest(string[] columnNames)
         {
             //block (intercept) REngine from printing to the Console
@@ -148,7 +176,7 @@ namespace MS_targeted
             }
             else
             {
-
+                outputToLog.WriteErrorLine("Regression failed");
             }
 
             //Re-enable Console printings
@@ -205,25 +233,57 @@ namespace MS_targeted
         /// Phenotype2  Value4
         /// Phenotype2  Value5
         /// </summary>
-        /// <param name="phenotypes">a list of the phenotypes for which the ANOVA test will run</param>
-        /// <param name="imputed_values">a list of arrays(double) that contain the values for the metabolite</param>
+        /// <param name="covariate_values">a list of arrays(double) that contain the values for the covariate</param>
+        /// <param name="metabolite_values">a list of arrays(double) that contain the values for the metabolite</param>
         /// <returns>an IEnumerable of arrays</returns>
-        public static void returnIEnurableNumeric(List<double[]> hba1c_values, List<double[]> numerical_values)
+        public static void returnIEnurableNumeric(List<double[]> covariate_values, List<double[]> metabolite_values)
         {
             //initialize the two lists that will be added in the IEnumerable
-            List<double> my_hba1c = new List<double>();
-            List<double> my_values = new List<double>();
+            List<double> my_covariate_values = new List<double>();
+            List<double> my_metabolite_values = new List<double>();
 
             //loop over the phenotypes
-            for (int i = 0; i < numerical_values.Count; i++)
+            for (int i = 0; i < metabolite_values.Count; i++)
             {
                 //create a lists of phenotypes equal to the length of the corresponding imputed_pvalues
-                my_hba1c.AddRange(hba1c_values.ElementAt(i));
+                my_covariate_values.AddRange(covariate_values.ElementAt(i));
                 //just add the numerical values
-                my_values.AddRange(numerical_values.ElementAt(i));
+                my_metabolite_values.AddRange(metabolite_values.ElementAt(i));
             }
 
-            dataFrameValues = new IEnumerable[] { my_hba1c.ToArray(), my_values.ToArray() };
+            dataFrameValues = new IEnumerable[] { my_covariate_values.ToArray(), my_metabolite_values.ToArray() };
+        }
+
+        /// <summary>
+        /// returns an IEnumerable of arrays in order to be used as a data-frame for the R code for the permutation test.
+        /// the two input lists have the same length
+        /// the IEnumbrable contains exactly two arrays. the first one contains the phenotypes and the second one the numerical values.
+        /// the IEnumerable should be of the following format:
+        /// Phenotype1  Value1
+        /// Phenotype1  Value2
+        /// Phenotype1  Value3
+        /// Phenotype2  Value4
+        /// Phenotype2  Value5
+        /// </summary>
+        /// <param name="covariate_values">a list of arrays(double) that contain the values for the covariate</param>
+        /// <param name="metabolite_values">a list of arrays(double) that contain the values for the metabolite</param>
+        /// <returns>an IEnumerable of arrays</returns>
+        public static void returnIEnurableCategoric(List<string[]> covariate_values, List<double[]> metabolite_values)
+        {
+            //initialize the two lists that will be added in the IEnumerable
+            List<string> my_covariate_values = new List<string>();
+            List<double> my_metabolite_values = new List<double>();
+
+            //loop over the phenotypes
+            for (int i = 0; i < metabolite_values.Count; i++)
+            {
+                //create a lists of phenotypes equal to the length of the corresponding imputed_pvalues
+                my_covariate_values.AddRange(covariate_values.ElementAt(i));
+                //just add the numerical values
+                my_metabolite_values.AddRange(metabolite_values.ElementAt(i));
+            }
+
+            dataFrameValues = new IEnumerable[] { my_covariate_values.ToArray(), my_metabolite_values.ToArray() };
         }
     }
 }

@@ -638,14 +638,14 @@ namespace MS_targeted
             public string Tissue { get; set; }
             public string Charge { get; set; }
 
-            public List<pairwiseRatioValues> Ratio { get; set; }
+            public List<pairwiseFoldChangeValues> Ratio { get; set; }
             public double MultiGroupPvalue { get; set; }
             public List<regressValues> RegressionValues { get; set; }
             public List<pairwiseTestValues> PairwiseTestPvalue { get; set; }
             public List<corrVars> CorrelationValues { get; set; }
             public List<corrMetabs> CorrelationMetabolites { get; set; }
 
-            public class pairwiseRatioValues
+            public class pairwiseFoldChangeValues
             {
                 public string group1 { get; set; }
                 public string group2 { get; set; }

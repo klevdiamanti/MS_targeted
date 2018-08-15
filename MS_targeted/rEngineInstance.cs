@@ -56,7 +56,7 @@ namespace MS_targeted
             }
             
             //load libraries
-            engine.Evaluate(@"library(lmPerm); library(ggplot2); library(grid); library(gridExtra); library(coin); library(Hmisc); library(RcmdrMisc);");
+            engine.Evaluate(@"library(lmPerm); library(ggplot2); library(grid); library(gridExtra); library(coin); library(Hmisc); library(RcmdrMisc); library();");
 
             //set seed
             engine.Evaluate("set.seed(2017)");

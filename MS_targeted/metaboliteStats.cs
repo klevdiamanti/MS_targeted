@@ -159,12 +159,12 @@ namespace MS_targeted
             //create list of arrays for imputed and non-imputed values
             //we need these lists to compute p-values
             //ANOVA and t-test methods require arrays
-            List<normalizationVals> listOfNormValues;
+            List<clinicalDataVals> listOfCovars;
 
             //create two list of tuples for imputed and non-imputed values
             //we need these lists to compute ratios between average values of pairs of phenotypes
             //in each tuple we store the two phenotypes between which the ratio was computed and the ratio value
-            List<msMetabolite.stats.pairwiseRatioValues> ratio;
+            List<msMetabolite.stats.pairwiseFoldChangeValues> ratio;
 
             //create two list of tuples for imputed and non-imputed values
             //we need these lists to store the ANOVA or t-test p-values for all phenotypes or for pairs of phenotypes
@@ -185,7 +185,16 @@ namespace MS_targeted
             Dictionary<string, List<msMetabolite.stats.corrMetabs>> dictOfCorrelationToMetabsVals;
 
             //clinical data names
-            List<string> clinicalDataNames = metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfNumClinicalData.Select(x => x.name).ToList();
+            List<string> numClinicalDataNames = metaboliteLevels.List_SampleForTissueAndCharge.First()
+                .ListOfNumClinicalData.Where(x => x.typeOf == sampleForTissueAndCharge.sampleClinicalData.type.numeric)
+                .Select(x => x.name).ToList();
+
+            //decide if you run a parametric or non-parametric test. Parametric is decided if there are at least 30 samples per phenotype.
+            //true for parametric; false for non-parametric
+            bool? paramOrNonParam;
+
+            //tmp vals
+            sampleForTissueAndCharge.sampleClinicalData scd;
 
             //loop through each tissue
             foreach (string tissue in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct())
@@ -194,13 +203,14 @@ namespace MS_targeted
                 //loop through each charge
                 foreach (string charge in metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct())
                 {
+                    paramOrNonParam = null;
                     //loop through each metabolite by selecting unique custom IDs
                     foreach (string custid in metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge).SelectMany(x => x.ListOfMetabolites).Select(x => x.mtbltDetails.In_customId).Distinct())
                     {
                         //initialize the lists and arrays
                         metabolite_values = new List<double[]>();
-                        listOfNormValues = new List<normalizationVals>();
-                        ratio = new List<msMetabolite.stats.pairwiseRatioValues>();
+                        listOfCovars = new List<clinicalDataVals>();
+                        ratio = new List<msMetabolite.stats.pairwiseFoldChangeValues>();
                         statTestPvalue = new List<msMetabolite.stats.pairwiseTestValues>();
                         phenotypeColumnNames = new string[] { "Phenotype", custid };
                         correlationToCovariatesVals = new List<msMetabolite.stats.corrVars>();
@@ -208,6 +218,8 @@ namespace MS_targeted
 
                         //loop over the phenotypes to keep info for numerical covariates for which we need to compute regressions
                         //each of the arrays contains as many elements as there are for each phenotype
+                        //
+                        //add metabolite level values in 
                         foreach (string pheno in phenotypes)
                         {
                             double[] tmpArrayMetabVal = new double[metaboliteLevels.List_SampleForTissueAndCharge.Count(x => x.Tissue == tissue && x.Charge == charge && x.Phenotype == pheno)];
@@ -218,32 +230,46 @@ namespace MS_targeted
                                     .ListOfMetabolites.First(x => x.mtbltDetails.In_customId == custid).mtbltVals.Imputed;
                                 foreach (string ncv in publicVariables.normCovars)
                                 {
-                                    if (listOfNormValues.Any(x => x.covarName == ncv))
+                                    scd = metaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge && x.Phenotype == pheno && x.Id == sampleId).ListOfNumClinicalData.First(x => x.name == ncv);
+                                    if (listOfCovars.Any(x => x.covarName == ncv))
                                     {
-                                        if (listOfNormValues.First(x => x.covarName == ncv).listOfVals.ContainsKey(pheno))
+                                        // both covariate and phenotype exists
+                                        if (listOfCovars.First(x => x.covarName == ncv).n_dictOfVals.ContainsKey(pheno))
                                         {
-                                            listOfNormValues.First(x => x.covarName == ncv).listOfVals[pheno]
-                                                .Add(metaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge && x.Phenotype == pheno && x.Id == sampleId).ListOfNumClinicalData.First(x => x.name == ncv).value);
+                                            // add a new value for the covariate
+                                            if (scd.typeOf == sampleForTissueAndCharge.sampleClinicalData.type.numeric)
+                                            {
+                                                listOfCovars.First(x => x.covarName == ncv).n_dictOfVals[pheno].Add(scd.n_value);
+                                            }
+                                            else if (scd.typeOf == sampleForTissueAndCharge.sampleClinicalData.type.categorical)
+                                            {
+                                                listOfCovars.First(x => x.covarName == ncv).c_dictOfVals[pheno].Add(scd.c_value);
+                                            }
                                         }
-                                        else
+                                        else // the current phenotype does not exist for the given covariate
                                         {
-                                            listOfNormValues.First(x => x.covarName == ncv).listOfVals.Add(pheno,
-                                                    new List<double>() { metaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge && x.Phenotype == pheno && x.Id == sampleId).ListOfNumClinicalData.First(x => x.name == ncv).value });
+                                            // add a new phenotype on the covariate
+                                            if (scd.typeOf == sampleForTissueAndCharge.sampleClinicalData.type.numeric)
+                                            {
+                                                listOfCovars.First(x => x.covarName == ncv).n_dictOfVals.Add(pheno, new List<double>() { scd.n_value });
+                                            }
+                                            else if (scd.typeOf == sampleForTissueAndCharge.sampleClinicalData.type.categorical)
+                                            {
+                                                listOfCovars.First(x => x.covarName == ncv).c_dictOfVals.Add(pheno, new List<string>() { scd.c_value });
+                                            }
                                         }
                                     }
-                                    else
+                                    else //neither the covariate nor the phenotype exist
                                     {
-                                        listOfNormValues.Add(new normalizationVals()
+                                        // add a new covariate
+                                        if (scd.typeOf == sampleForTissueAndCharge.sampleClinicalData.type.numeric)
                                         {
-                                            covarName = ncv,
-                                            listOfVals = new Dictionary<string, List<double>>()
-                                            {
-                                                {
-                                                    pheno,
-                                                    new List<double>(){ metaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge && x.Phenotype == pheno && x.Id == sampleId).ListOfNumClinicalData.First(x => x.name == ncv).value }
-                                                }
-                                            }
-                                        });
+                                            listOfCovars.Add(new clinicalDataVals(ncv, pheno, scd.n_value, null));
+                                        }
+                                        else if (scd.typeOf == sampleForTissueAndCharge.sampleClinicalData.type.categorical)
+                                        {
+                                            listOfCovars.Add(new clinicalDataVals(ncv, pheno, -1, scd.c_value));
+                                        }
                                     }
                                 }
                                 i++;
@@ -251,7 +277,39 @@ namespace MS_targeted
                             metabolite_values.Add(tmpArrayMetabVal);
                         }
 
-                        //loop over the phenotypes in order to get each pair of phenotype
+                        //decide whether we apply parametric or non parametric test
+                        if (metabolite_values.All(x => x.Length >= publicVariables.parametricTestThreshold))
+                        {
+                            if (paramOrNonParam == null) //if paramOrNonParam has not been set yet, then just set it
+                            {
+                                paramOrNonParam = true;
+                            }
+                            else if (paramOrNonParam == false) //if before we dicided non-parametric and now parametric within the same tissue and charge then we have a problem
+                            {
+                                outputToLog.WriteErrorLine("Inconsistent number of samples for tissue: " + tissue + " and charge: " + charge + " for metabolite " + custid);
+                            }
+                            else //NO PROBLEM: paramOrNonParam remains true for parametric test
+                            {
+                                paramOrNonParam = true;
+                            }
+                        }
+                        else
+                        {
+                            if (paramOrNonParam == null) //if paramOrNonParam has not been set yet, then just set it
+                            {
+                                paramOrNonParam = false;
+                            }
+                            else if (paramOrNonParam == true) //if before we dicided parametric and now non-parametric within the same tissue and charge then we have a problem
+                            {
+                                outputToLog.WriteErrorLine("Inconsistent number of samples for tissue: " + tissue + " and charge: " + charge + " for metabolite " + custid);
+                            }
+                            else //NO PROBLEM: paramOrNonParam remains false for non-parametric test
+                            {
+                                paramOrNonParam = false;
+                            }
+                        }
+
+                        //loop over the phenotypes in order to get all potential pairs of phenotypes
                         //calculate the ratio for imputed and non-imputed values for pair-wise phenotypes, and store them in the corresponding lists of tuples
                         //calculate the p-value for imputed and non-imputed values for pair-wise phenotypes, and store them in the corresponding lists of tuples
                         //it does not matter that we use an ANOVA instead of a t-test for the permutation statistic here since they should coincide because an ANOVA for two classes is equal to a t-test
@@ -260,7 +318,7 @@ namespace MS_targeted
                             for (int j = i + 1; j < phenotypes.Count; j++)
                             {
                                 returnFCandCI rfcaci = foldChangeCI.calculateFoldChangeAndCI(metabolite_values.ElementAt(j), metabolite_values.ElementAt(i));
-                                ratio.Add(new msMetabolite.stats.pairwiseRatioValues()
+                                ratio.Add(new msMetabolite.stats.pairwiseFoldChangeValues()
                                 {
                                     group1 = phenotypes.ElementAt(i),
                                     group2 = phenotypes.ElementAt(j),
@@ -283,24 +341,46 @@ namespace MS_targeted
                         permutationTest.returnIEnurable(phenotypes, metabolite_values);
                         if (publicVariables.numberOfClasses == publicVariables.numberOfClassesValues.two)
                         {
-                            multiGroupTestPvalue = permutationTest.wilcoxonMannWhitneyPermutationTest(phenotypeColumnNames);
+                            if (paramOrNonParam == true)
+                            {
+                                multiGroupTestPvalue = permutationTest.ttestPermutationTest(phenotypeColumnNames);
+                            }
+                            else
+                            {
+                                multiGroupTestPvalue = permutationTest.wilcoxonMannWhitneyPermutationTest(phenotypeColumnNames);
+                            }
                         }
                         else
                         {
-                            multiGroupTestPvalue = permutationTest.kruskalWallisPermutationTest(phenotypeColumnNames);
+                            if (paramOrNonParam == true)
+                            {
+                                multiGroupTestPvalue = permutationTest.aovpPermutationTest(phenotypeColumnNames);
+                            }
+                            else
+                            {
+                                multiGroupTestPvalue = permutationTest.kruskalWallisPermutationTest(phenotypeColumnNames);
+                            }
                         }
 
                         //linear regression model between metabolite levels and HbA1c
-                        foreach (normalizationVals nv in listOfNormValues)
+                        foreach (clinicalDataVals nv in listOfCovars)
                         {
-                            permutationTest.returnIEnurableNumeric(nv.listOfVals.Select(x => x.Value.ToArray()).ToList(), metabolite_values);
-                            regressionVals.Add(permutationTest.linearRegressionTest(new string[] { nv.covarName, custid }, "number"));
+                            if (nv.typeOf == clinicalDataVals.type.numeric)
+                            {
+                                permutationTest.returnIEnurableNumeric(nv.n_dictOfVals.Select(x => x.Value.ToArray()).ToList(), metabolite_values);
+                                regressionVals.Add(permutationTest.linearRegressionTest(new string[] { nv.covarName, custid }, "number"));
+                            }
+                            else if (nv.typeOf == clinicalDataVals.type.categorical)
+                            {
+                                permutationTest.returnIEnurableCategoric(nv.c_dictOfVals.Select(x => x.Value.ToArray()).ToList(), metabolite_values);
+                                regressionVals.Add(permutationTest.linearRegressionTest(new string[] { nv.covarName, custid }, "factor"));
+                            }
                         }
 
                         //calculate spearman correlations
-                        if (clinicalDataNames.Count > 0)
+                        if (numClinicalDataNames.Count > 0)
                         {
-                            correlationToCovariatesVals = correlations.correlateMetabsToCovariates(tissue, charge, custid, clinicalDataNames);
+                            correlationToCovariatesVals = correlations.correlateMetabsToCovariates(tissue, charge, custid, numClinicalDataNames);
                         }
 
                         foreach (sampleForTissueAndCharge sftac in metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge))
@@ -323,10 +403,34 @@ namespace MS_targeted
             }
         }
 
-        private class normalizationVals
+        private class clinicalDataVals
         {
-            public Dictionary<string, List<double>> listOfVals;
+            public Dictionary<string, List<double>> n_dictOfVals;
+            public Dictionary<string, List<string>> c_dictOfVals;
             public string covarName;
+            public enum type
+            {
+                numeric,
+                categorical
+            }
+            public type typeOf { get; set; }
+
+            // in order to add a numeric value send _cv argument as null
+            // for the opposite send the _nv argument as null
+            public clinicalDataVals(string _cn, string _pheno, double _nv, string _cv)
+            {
+                covarName = _cn;
+                if (string.IsNullOrEmpty(_cv) || string.IsNullOrWhiteSpace(_cv))
+                {
+                    n_dictOfVals = new Dictionary<string, List<double>>() { { _pheno, new List<double>() { _nv } } };
+                    typeOf = type.numeric;
+                }
+                else
+                {
+                    c_dictOfVals = new Dictionary<string, List<string>>() { { _pheno, new List<string>() { _cv } } };
+                    typeOf = type.categorical;
+                }
+            }
         }
 
         private class tmpPerSampleRatios

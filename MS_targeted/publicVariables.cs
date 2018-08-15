@@ -78,6 +78,9 @@ namespace MS_targeted
         public static string phenotype { get; set; }
         private static bool phenotypeIsSet = false;
 
+        public static int parametricTestThreshold { get; set; }
+        private static bool parametricTestThresholdIsSet = false;
+
         //what to print
         public static bool printTheMetaboliteDetails = false;
         public static bool printBoxplots = false;
@@ -138,6 +141,21 @@ namespace MS_targeted
                                 else
                                 {
                                     numberOfPermutationsIsSet = false;
+                                    outputToLog.WriteErrorLine("Parameter " + line.Split('\t').First() + " from configuration file was not integer or positive");
+                                }
+                                #endregion
+                                break;
+                            case "ParametricTestThreshold":
+                                #region set ParametricTestThreshold
+                                if (int.TryParse(line.Split('\t').ElementAt(1), out tmpInt) && tmpInt > 0)
+                                {
+                                    parametricTestThreshold = tmpInt;
+                                    parametricTestThresholdIsSet = true;
+                                    outputToLog.WriteLine("ParametricTestThreshold was successfully set as " + parametricTestThreshold);
+                                }
+                                else
+                                {
+                                    parametricTestThresholdIsSet = false;
                                     outputToLog.WriteErrorLine("Parameter " + line.Split('\t').First() + " from configuration file was not integer or positive");
                                 }
                                 #endregion
@@ -891,6 +909,10 @@ namespace MS_targeted
             else if (!initializeREngineIsSet)
             {
                 outputToLog.WriteErrorLine("REngine could not be initialized because R_HOME or R_DLL are not in the configuration file");
+            }
+            else if (!parametricTestThresholdIsSet)
+            {
+                outputToLog.WriteErrorLine("ParametricTestThreshold has not been set in the configuration file");
             }
             #endregion
 

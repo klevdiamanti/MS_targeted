@@ -174,9 +174,9 @@ namespace MS_targeted
             foreach (sampleForTissueAndCharge sftac in metaboliteLevels.List_SampleForTissueAndCharge.Where(x => x.Tissue == tissue && x.Charge == charge))
             {
                 ctm[cntRow, cntCol++] = sftac.ListOfMetabolites.First(x => x.mtbltDetails.In_customId == metaboliteID).mtbltVals.Imputed;
-                foreach (sampleForTissueAndCharge.numClinicalData t_cd in sftac.ListOfNumClinicalData)
+                foreach (sampleForTissueAndCharge.sampleClinicalData t_cd in sftac.ListOfNumClinicalData)
                 {
-                    ctm[cntRow, cntCol++] = t_cd.value;
+                    ctm[cntRow, cntCol++] = t_cd.n_value;
                 }
                 cntRow++;
                 cntCol = 0;

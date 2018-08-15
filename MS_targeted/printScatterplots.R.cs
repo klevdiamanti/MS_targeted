@@ -79,7 +79,7 @@ namespace MS_targeted
                                     phenoMetabValPairs.Add(new rDataFrame(){
                                             phenotype = sftac.Phenotype,
                                             metabolite = sftac.ListOfMetabolites.First(x => x.mtbltDetails.In_customId == mtbl.In_customId).mtbltVals.Imputed,
-                                            clinical_data = sftac.ListOfNumClinicalData.First(x => x.name == typeOfClinicalData).value
+                                            clinical_data = sftac.ListOfNumClinicalData.First(x => x.name == typeOfClinicalData).n_value
                                     });
                                 }
 
