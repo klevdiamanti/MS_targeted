@@ -1,12 +1,12 @@
 
 # MS_targeted output files
 
-**For detailed explanation of the input files and examples please check [MS_targeted_input.md](MS_targeted_input.md)**
+**For detailed explanation on the input files and examples please check [MS_targeted_input.md](MS_targeted_input.md)**
 
 **Files used in this section:**
+- [input ms data file](MS_targeted/sample_data/input_ms/gcms_adams_plasma.tsv)
 - [metadata file](MS_targeted/sample_data/metadata/gcms_fiehn_metadata.tsv)
 - [configuration file](MS_targeted/sample_data/conf/MS_targeted.conf)
-- [input ms data file](MS_targeted/sample_data/input_ms/gcms_adams_plasma.tsv)
 - [MS_targeted custom database file](MS_targeted/sample_data/db/20171204_metabolites_db.tsv.zip)
 
 ## log file
