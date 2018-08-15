@@ -42,13 +42,13 @@ namespace MS_targeted
 
             // REngine requires explicit initialization.
             // You can set some parameters.
-            prepareREndgine(R_packages);
+            prepareREngine(R_packages);
 
             //Re-enable Console printings
             Console.SetOut(stdOut);
         }
 
-        private static void prepareREndgine(string R_packages)
+        private static void prepareREngine(string R_packages)
         {
             if (!string.IsNullOrEmpty(R_packages) && !string.IsNullOrWhiteSpace(R_packages))
             {
@@ -56,7 +56,7 @@ namespace MS_targeted
             }
             
             //load libraries
-            engine.Evaluate(@"library(lmPerm); library(ggplot2); library(grid); library(gridExtra); library(coin); library(Hmisc); library(RcmdrMisc); library();");
+            engine.Evaluate(@"library(lmPerm); library(ggplot2); library(grid); library(gridExtra); library(coin); library(Hmisc); library(RcmdrMisc); library(RVAideMemoire);");
 
             //set seed
             engine.Evaluate("set.seed(2017)");

@@ -148,7 +148,7 @@ namespace MS_targeted
             //run permutation test and take the pvalue
             if (_typeof == "factor")
             {
-                rEngineInstance.engine.Evaluate(string.Format("myres <- summary(lmp(as.numeric(df[,'{1}']) ~ as.factor(df[,'{0}']), perm = \"{2}\", seqs = {3}, " +
+                rEngineInstance.engine.Evaluate(string.Format("myres <- summary(lmp(as.numeric(df[,'{0}']) ~ as.factor(df[,'{1}']), perm = \"{2}\", seqs = {3}, " +
                     "center = {4}, projections = {5}, qr = {6}, maxIter = {7}, nCycle = {8}))",
                         columnNames[1],
                         columnNames[0],
@@ -162,7 +162,7 @@ namespace MS_targeted
             }
             else if (_typeof == "number")
             {
-                rEngineInstance.engine.Evaluate(string.Format("myres <- summary(lmp(as.numeric(df[,'{1}']) ~ as.numeric(df[,'{0}']), perm = \"{2}\", seqs = {3}, " +
+                rEngineInstance.engine.Evaluate(string.Format("myres <- summary(lmp(as.numeric(df[,'{0}']) ~ as.numeric(df[,'{1}']), perm = \"{2}\", seqs = {3}, " +
                     "center = {4}, projections = {5}, qr = {6}, maxIter = {7}, nCycle = {8}))",
                         columnNames[1],
                         columnNames[0],

@@ -233,28 +233,32 @@ namespace MS_targeted
                                     scd = metaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge && x.Phenotype == pheno && x.Id == sampleId).ListOfNumClinicalData.First(x => x.name == ncv);
                                     if (listOfCovars.Any(x => x.covarName == ncv))
                                     {
-                                        // both covariate and phenotype exists
-                                        if (listOfCovars.First(x => x.covarName == ncv).n_dictOfVals.ContainsKey(pheno))
+                                        // add a new value for the covariate
+                                        if (scd.typeOf == sampleForTissueAndCharge.sampleClinicalData.type.numeric)
                                         {
-                                            // add a new value for the covariate
-                                            if (scd.typeOf == sampleForTissueAndCharge.sampleClinicalData.type.numeric)
+                                            // both covariate and phenotype exists
+                                            if (listOfCovars.First(x => x.covarName == ncv).n_dictOfVals.ContainsKey(pheno))
                                             {
+                                                // add a new value for the covariate
                                                 listOfCovars.First(x => x.covarName == ncv).n_dictOfVals[pheno].Add(scd.n_value);
                                             }
-                                            else if (scd.typeOf == sampleForTissueAndCharge.sampleClinicalData.type.categorical)
+                                            else // the current phenotype does not exist for the given covariate
                                             {
-                                                listOfCovars.First(x => x.covarName == ncv).c_dictOfVals[pheno].Add(scd.c_value);
-                                            }
-                                        }
-                                        else // the current phenotype does not exist for the given covariate
-                                        {
-                                            // add a new phenotype on the covariate
-                                            if (scd.typeOf == sampleForTissueAndCharge.sampleClinicalData.type.numeric)
-                                            {
+                                                // add a new phenotype on the covariate
                                                 listOfCovars.First(x => x.covarName == ncv).n_dictOfVals.Add(pheno, new List<double>() { scd.n_value });
                                             }
-                                            else if (scd.typeOf == sampleForTissueAndCharge.sampleClinicalData.type.categorical)
+                                        }
+                                        else if (scd.typeOf == sampleForTissueAndCharge.sampleClinicalData.type.categorical)
+                                        {
+                                            // both covariate and phenotype exists
+                                            if (listOfCovars.First(x => x.covarName == ncv).c_dictOfVals.ContainsKey(pheno))
                                             {
+                                                // add a new value for the covariate
+                                                listOfCovars.First(x => x.covarName == ncv).c_dictOfVals[pheno].Add(scd.c_value);
+                                            }
+                                            else // the current phenotype does not exist for the given covariate
+                                            {
+                                                // add a new phenotype on the covariate
                                                 listOfCovars.First(x => x.covarName == ncv).c_dictOfVals.Add(pheno, new List<string>() { scd.c_value });
                                             }
                                         }
@@ -367,13 +371,37 @@ namespace MS_targeted
                         {
                             if (nv.typeOf == clinicalDataVals.type.numeric)
                             {
-                                permutationTest.returnIEnurableNumeric(nv.n_dictOfVals.Select(x => x.Value.ToArray()).ToList(), metabolite_values);
-                                regressionVals.Add(permutationTest.linearRegressionTest(new string[] { nv.covarName, custid }, "number"));
+                                if (nv.n_dictOfVals.SelectMany(x => x.Value).Distinct().Count() == 1)
+                                {
+                                    regressionVals.Add(new msMetabolite.stats.regressValues()
+                                    {
+                                        clinical_data_name = nv.covarName,
+                                        regrAdjRsquare = 0,
+                                        regrPvalue = 1
+                                    });
+                                }
+                                else
+                                {
+                                    permutationTest.returnIEnurableNumeric(nv.n_dictOfVals.Select(x => x.Value.ToArray()).ToList(), metabolite_values);
+                                    regressionVals.Add(permutationTest.linearRegressionTest(new string[] { nv.covarName, custid }, "number"));
+                                }
                             }
                             else if (nv.typeOf == clinicalDataVals.type.categorical)
                             {
-                                permutationTest.returnIEnurableCategoric(nv.c_dictOfVals.Select(x => x.Value.ToArray()).ToList(), metabolite_values);
-                                regressionVals.Add(permutationTest.linearRegressionTest(new string[] { nv.covarName, custid }, "factor"));
+                                if (nv.c_dictOfVals.SelectMany(x => x.Value).Distinct().Count() == 1)
+                                {
+                                    regressionVals.Add(new msMetabolite.stats.regressValues()
+                                    {
+                                        clinical_data_name = nv.covarName,
+                                        regrAdjRsquare = 0,
+                                        regrPvalue = 1
+                                    });
+                                }
+                                else
+                                {
+                                    permutationTest.returnIEnurableCategoric(nv.c_dictOfVals.Select(x => x.Value.ToArray()).ToList(), metabolite_values);
+                                    regressionVals.Add(permutationTest.linearRegressionTest(new string[] { nv.covarName, custid }, "factor"));
+                                }
                             }
                         }
 
