@@ -10,8 +10,18 @@
 - [MS_targeted custom database file](MS_targeted/sample_data/db/20171204_metabolites_db.tsv.zip)
 
 **Output file-formats and directories in this sectiom**
-- [log file](https://github.com/klevdiamanti/MS_targeted/blob/master/MS_targeted_output.md#log)
+- [log file](https://github.com/klevdiamanti/MS_targeted/blob/master/MS_targeted_output.md#log-file)
+- [metabolite details](https://github.com/klevdiamanti/MS_targeted/blob/master/MS_targeted_output.md#metabolite-details)
+- [boxplots](https://github.com/klevdiamanti/MS_targeted/blob/master/MS_targeted_output.md#boxplots)
+- [scatterplots](https://github.com/klevdiamanti/MS_targeted/blob/master/MS_targeted_output.md#scatterplots)
 - [pathways](https://github.com/klevdiamanti/MS_targeted/blob/master/MS_targeted_output.md#pathways)
+- [metabolite statistics](https://github.com/klevdiamanti/MS_targeted/blob/master/MS_targeted_output.md#metabolite-statistics)
+- [metabolite regression models](https://github.com/klevdiamanti/MS_targeted/blob/master/MS_targeted_output.md#metabolite-regression-models)
+- [significance of ratios of metabolites](https://github.com/klevdiamanti/MS_targeted/blob/master/MS_targeted_output.md#significance-of-ratios-of-metabolites)
+- [correlation of metabolites to covariates](https://github.com/klevdiamanti/MS_targeted/blob/master/MS_targeted_output.md#correlation-of-metabolites-to-covariates)
+- [correlation of metabolites to metabolites](https://github.com/klevdiamanti/MS_targeted/blob/master/MS_targeted_output.md#correlation-of-metabolites-to-metabolites)
+- [machine learning datasets](https://github.com/klevdiamanti/MS_targeted/blob/master/MS_targeted_output.md#machine-learning-datasets)
+- [output for MoDentify](https://github.com/klevdiamanti/MS_targeted/blob/master/MS_targeted_output.md#output-for-MoDentify)
 
 ## log file
 MS_targeted prints a log file that contains the configuration of the pipeline and some of the key steps. The log file is located under the 'output_dir' and its name is set in the configuration file.
