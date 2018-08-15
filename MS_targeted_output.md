@@ -3,13 +3,7 @@
 
 **For detailed explanation on the input files and examples please check [MS_targeted_input.md](MS_targeted_input.md)**
 
-**Files used in this section:**
-- [input ms data file](MS_targeted/sample_data/input_ms/gcms_adams_plasma.tsv)
-- [metadata file](MS_targeted/sample_data/metadata/gcms_fiehn_metadata.tsv)
-- [configuration file](MS_targeted/sample_data/conf/MS_targeted.conf)
-- [MS_targeted custom database file](MS_targeted/sample_data/db/20171204_metabolites_db.tsv.zip)
-
-**Output file-formats and directories in this sectiom**
+**Output file-formats and directories in this section**
 - [log file](https://github.com/klevdiamanti/MS_targeted/blob/master/MS_targeted_output.md#log-file)
 - [metabolite details](https://github.com/klevdiamanti/MS_targeted/blob/master/MS_targeted_output.md#metabolite-details)
 - [boxplots](https://github.com/klevdiamanti/MS_targeted/blob/master/MS_targeted_output.md#boxplots)
@@ -22,6 +16,12 @@
 - [correlation of metabolites to metabolites](https://github.com/klevdiamanti/MS_targeted/blob/master/MS_targeted_output.md#correlation-of-metabolites-to-metabolites)
 - [machine learning datasets](https://github.com/klevdiamanti/MS_targeted/blob/master/MS_targeted_output.md#machine-learning-datasets)
 - [output for MoDentify](https://github.com/klevdiamanti/MS_targeted/blob/master/MS_targeted_output.md#output-for-MoDentify)
+
+**Files used in this section:**
+- [input ms data file](MS_targeted/sample_data/input_ms/gcms_adams_plasma.tsv)
+- [metadata file](MS_targeted/sample_data/metadata/gcms_fiehn_metadata.tsv)
+- [configuration file](MS_targeted/sample_data/conf/MS_targeted.conf)
+- [MS_targeted custom database file](MS_targeted/sample_data/db/20171204_metabolites_db.tsv.zip)
 
 ## log file
 MS_targeted prints a log file that contains the configuration of the pipeline and some of the key steps. The log file is located under the 'output_dir' and its name is set in the configuration file.
