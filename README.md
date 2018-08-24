@@ -5,10 +5,9 @@ MS_targeted can handle multiple tissues and charges simultaneously.
 **For any questions or issues please use the Issues in github or contact Klev Diamanti.**
 
 ## Notes
-- It is required that you have installed the latest version of mono and R 3.4.X.
-- You will find the ready-to-run executable under [MS_targeted/exec/](MS_targeted/exec/MS_targeted.exe).
-- The R packages lmPerm, coin, gridExtra, ggplot2, Hmisc, RcmdrMisc and RVAideMemoire are required to be pre-installed.
-- MS_targeted will not run with R 3.5.X due to incompatibilities of the RDotNet package with the latest version of R.
+- You will find the pre-compiled executables under [MS_targeted/exec/](MS_targeted/exec/MS_targeted.exe).
+- It is required that you have installed the latest version of mono and R 3.4.X. **Note:** MS_targeted will not run with R 3.5.X due to incompatibilities of the RDotNet package with the latest version of R.
+- The R packages [lmPerm](https://cran.r-project.org/web/packages/lmPerm/index.html), [coin](https://cran.r-project.org/web/packages/coin/index.html), [gridExtra](https://cran.r-project.org/web/packages/gridExtra/index.html), [ggplot2](https://cran.r-project.org/web/packages/ggplot2/index.html), [Hmisc](https://cran.r-project.org/web/packages/Hmisc/index.html), [RcmdrMisc](https://cran.r-project.org/web/packages/RcmdrMisc/index.html) and [RVAideMemoire](https://cran.r-project.org/web/packages/RVAideMemoire/index.html) are required to be pre-installed.
 - You will need to decompress the [database file](MS_targeted/sample_data/db/20171204_metabolites_db.tsv.zip) prior to running the pipeline.
 - Detailed explanation of the input files and options is provided in [MS_targeted_input.md](MS_targeted_input.md).
 - Detailed explanation of the output files is provided in [MS_targeted_output.md](MS_targeted_output.md).
