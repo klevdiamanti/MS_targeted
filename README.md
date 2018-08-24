@@ -16,17 +16,17 @@ MS_targeted can handle multiple tissues and charges simultaneously.
 ```
 [mono] MS_targeted.exe input_ms_dir clinical_data_file combined_db_file conf_file output_dir
 ```
-Prior to running MS_targeted you will need to structure the metadata (covariates) and mass spectrometry input data according to the [sample files](MS_targeted/sample_data/) provided. The sample data have been taken from the metabolomics workbench study ST000383 (Fiehn et al., 2010).
+Prior to running MS_targeted you will need to structure the metadata (covariates) and mass spectrometry input data according to the [sample files](MS_targeted/sample_data/) from metabolomics workbench study [ST000383](http://www.metabolomicsworkbench.org/data/DRCCMetadata.php?Mode=Study&StudyID=ST000383) [(Fiehn et al., 2010)](https://www.ncbi.nlm.nih.gov/pubmed/21170321).
 #### input_ms_dir
-Directory where the input mass spectrometry data are stored in plain text comma-separated or tab-separated files. All the input files should have the same prefic prior to the first underscore (_) and the extension. The various database id for each metabolite you can set them in the input files. We suggest that you have one file for each tissue. Please check [MS_targeted/sample_data/input_ms/](MS_targeted/sample_data/input_ms/) for an example.
-Note that it is required that you have one custom id for every metabolite, that is defined in the row AZm_id. These id's should contain at least one letter.
+Directory where the input mass spectrometry data are stored in plain text comma- or tab-separated files. All the input files should have the same <u>prefix</u> prior to the first underscore (_) and the <u>extension</u>. The various database id's for each metabolite should be set in the input files. We recommend you have one file for each tissue. Please check [MS_targeted/sample_data/input_ms/](MS_targeted/sample_data/input_ms/) for an example.
+Note that one custom id for every metabolite is required, that is defined in the row m_id. These id's should contain at least one letter and numbers.
 #### clinical_data_file
-File where the metadata or covariates for the samples are stored. This is a plain text file preferably tab-delimited. In the first row the unique names for each covariate should be mentioned. In the next row the type of the covariate should be mentioned (exclusively categorical or numeric). Please check [MS_targeted/sample_data/metadata/](MS_targeted/sample_data/metadata/) for an example.
+File where the metadata or covariates for the samples are stored. This is a plain text comma- or tab-delimited file. The first row should contain unique names for each covariate. The next row should contain the type of the covariate <u>(exclusively categorical or numeric)</u>. Please check [MS_targeted/sample_data/metadata/](MS_targeted/sample_data/metadata/) for an example.
 #### combined_db_file
-This is a meta-data file that contains various database id's for thousands of metabolites. The file should be the output from the repository metabolomicsDB.exe. For a start you might use the tab-separated file under [MS_targeted/sample_data/db/](MS_targeted/sample_data/db/). Please decompress the file before using it.
+This is a meta-data file that contains various database id's for thousands of metabolites. The file should be the output from the repository [metabolomicsDB](https://github.com/klevdiamanti/metabolomicsDB/). For a start you might use the tab-separated file under [MS_targeted/sample_data/db/](MS_targeted/sample_data/db/). Please decompress the file before using it.
 #### conf_file
-This file configures various parameters for MS_targeted. The sample file under [MS_targeted/sample_data/conf/](MS_targeted/sample_data/conf/) contains enough comments and details.
+This file configures various parameters for MS_targeted. The sample file under [MS_targeted/sample_data/conf/](MS_targeted/sample_data/conf/) contains comments and details.
 #### output_dir
-An existing or not existing output directory  where all the output files will be written. Please note that if the file exists it will be overwritten.
+An existing or not existing output directory  where all the output files will be written. Please note that if the directory exists it will be overwritten.
 ## Citation
 Klev Diamanti, Marco Cavalli, Gang Pan, Maria João Pereira, Chanchal Kumar, Stanko Skrtic, Manfred Grabherr, Ulf Risérus, Jan W Eriksson, Jan Komorowski and Claes Wadelius (2018). "Metabolic landscape of five tissues suggests new molecular defects in type-2 diabetes". Submitted.
