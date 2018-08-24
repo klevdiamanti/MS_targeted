@@ -1,5 +1,5 @@
 # MS_targeted
-MS_targeted is an open-source command-line pipeline for statistical analysis of mass spectrometry metabolomics data. The pipeline is written in C# and runs in all platforms. For Windows you can run it through cmd.exe, in OSX and in Linux through the terminal.
+MS_targeted is an open-source command-line pipeline for statistical analysis of mass spectrometry metabolomics data. The pipeline is implemented in C# and R, and runs in all platforms. In Windows you can run it on cmd.exe, while in OSX and Linux on the terminal with the cross-platform open-source .NET framework  mono.
 MS_targeted can handle multiple tissues and charges simultaneously.
 
 **For any questions or issues please use the Issues in github or contact Klev Diamanti.**
