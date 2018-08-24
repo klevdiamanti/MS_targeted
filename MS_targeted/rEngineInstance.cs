@@ -1,6 +1,5 @@
 ﻿using RDotNet;
 using System;
-using System.IO;
 
 namespace MS_targeted
 {
@@ -10,11 +9,6 @@ namespace MS_targeted
 
         public static void initializeREngine(string R_HOME, string R_DLL, string R_packages)
         {
-            //block (intercept) REngine from printing to the Console
-            //we are just redirecting the output of it to some StringWriter
-            var stdOut = Console.Out;
-            Console.SetOut(new StringWriter());
-
             if (string.IsNullOrEmpty(R_HOME) || string.IsNullOrWhiteSpace(R_HOME))
             {
                 REngine.SetEnvironmentVariables();
@@ -43,9 +37,6 @@ namespace MS_targeted
             // REngine requires explicit initialization.
             // You can set some parameters.
             prepareREngine(R_packages);
-
-            //Re-enable Console printings
-            Console.SetOut(stdOut);
         }
 
         private static void prepareREngine(string R_packages)
@@ -54,9 +45,82 @@ namespace MS_targeted
             {
                 engine.Evaluate(".libPaths(c('" + R_packages + "', .libPaths()))");
             }
-            
+
             //load libraries
-            engine.Evaluate(@"library(lmPerm); library(ggplot2); library(grid); library(gridExtra); library(coin); library(Hmisc); library(RcmdrMisc); library(RVAideMemoire);");
+            #region check installed R libraries
+            try
+            {
+                engine.Evaluate(@"library(lmPerm)");
+            }
+            catch (Exception)
+            {
+                outputToLog.WriteErrorLine("There was an error while loading the R package lmPerm. Please check that it is installed.");
+            }
+
+            try
+            {
+                engine.Evaluate(@"library(ggplot2)");
+            }
+            catch (Exception)
+            {
+                outputToLog.WriteErrorLine("There was an error while loading the R package ggplot2. Please check that it is installed.");
+            }
+
+            try
+            {
+                engine.Evaluate(@"library(grid)");
+            }
+            catch (Exception)
+            {
+                outputToLog.WriteErrorLine("There was an error while loading the R package grid. Please check that it is installed.");
+            }
+
+            try
+            {
+                engine.Evaluate(@"library(gridExtra)");
+            }
+            catch (Exception)
+            {
+                outputToLog.WriteErrorLine("There was an error while loading the R package gridExtra. Please check that it is installed.");
+            }
+
+            try
+            {
+                engine.Evaluate(@"library(coin)");
+            }
+            catch (Exception)
+            {
+                outputToLog.WriteErrorLine("There was an error while loading the R package coin. Please check that it is installed.");
+            }
+
+            try
+            {
+                engine.Evaluate(@"library(Hmisc)");
+            }
+            catch (Exception)
+            {
+                outputToLog.WriteErrorLine("There was an error while loading the R package Hmisc. Please check that it is installed.");
+            }
+
+            try
+            {
+                engine.Evaluate(@"library(RcmdrMisc)");
+            }
+            catch (Exception)
+            {
+                outputToLog.WriteErrorLine("There was an error while loading the R package RcmdrMisc. Please check that it is installed.");
+            }
+
+            try
+            {
+                engine.Evaluate(@"library(RVAideMemoire)");
+            }
+            catch (Exception)
+            {
+                outputToLog.WriteErrorLine("There was an error while loading the R package RVAideMemoire. Please check that it is installed.");
+            }
+            //engine.Evaluate(@"library(lmPerm); library(ggplot2); library(grid); library(gridExtra); library(coin); library(Hmisc); library(RcmdrMisc); library(RVAideMemoire);");
+            #endregion
 
             //set seed
             engine.Evaluate("set.seed(2017)");

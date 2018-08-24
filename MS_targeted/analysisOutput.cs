@@ -216,10 +216,10 @@ namespace MS_targeted
                     pairwiseTest = (publicVariables.numberOfClasses == publicVariables.numberOfClassesValues.two) ? "" : "pVal" + publicVariables.breakCharInFile;
                     for (int i = 0; i < metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.Count; i++)
                     {
-                        pairwiseTest += metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "to" +
-                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "fc" + publicVariables.breakCharInFile +
-                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "to" +
-                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "pv" + publicVariables.breakCharInFile;
+                        pairwiseTest += metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2 + "_to_" +
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1 + "_fc" + publicVariables.breakCharInFile +
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2 + "_to_" +
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1 + "_pv" + publicVariables.breakCharInFile;
                     }
                     pairwiseTest = pairwiseTest.Substring(0, pairwiseTest.Length - 1);
 
@@ -339,12 +339,12 @@ namespace MS_targeted
                     pairwiseTest = (publicVariables.numberOfClasses == publicVariables.numberOfClassesValues.two) ? "" : "pVal" + publicVariables.breakCharInFile;
                     for (int i = 0; i < metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.Count; i++)
                     {
-                        pairwiseTest += metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "to" +
-                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "fc" + publicVariables.breakCharInFile +
-                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "to" +
-                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "ci" + publicVariables.breakCharInFile +
-                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "to" +
-                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "pv" + publicVariables.breakCharInFile;
+                        pairwiseTest += metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1 + "_to_" +
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2 + "_fc" + publicVariables.breakCharInFile +
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1 + "_to_" +
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2 + "_ci" + publicVariables.breakCharInFile +
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1 + "_to_" +
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2 + "_pv" + publicVariables.breakCharInFile;
                     }
                     pairwiseTest = pairwiseTest.Substring(0, pairwiseTest.Length - 1);
 
@@ -419,12 +419,12 @@ namespace MS_targeted
                     pairwiseTest = (publicVariables.numberOfClasses == publicVariables.numberOfClassesValues.two) ? "" : "pVal" + publicVariables.breakCharInFile;
                     for (int i = 0; i < metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.Count; i++)
                     {
-                        pairwiseTest += metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "to" +
-                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "fc" + publicVariables.breakCharInFile +
-                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "to" +
-                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "ci" + publicVariables.breakCharInFile +
-                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1.First() + "to" +
-                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2.First() + "pv" + publicVariables.breakCharInFile;
+                        pairwiseTest += metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1 + "_to_" +
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2 + "_fc" + publicVariables.breakCharInFile +
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1 + "_to_" +
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2 + "_ci" + publicVariables.breakCharInFile +
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group1 + "_to_" +
+                            metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.PairwiseTestPvalue.ElementAt(i).group2 + "_pv" + publicVariables.breakCharInFile;
                     }
                     pairwiseTest = pairwiseTest.Substring(0, pairwiseTest.Length - 1);
 
