@@ -1,5 +1,5 @@
 # MS_targeted
-MS_targeted is an open-source command-line pipeline for statistical analysis of mass spectrometry metabolomics data. The pipeline is implemented in C# and R, and runs in all platforms. In Windows you can run it on cmd.exe, while in OSX and Linux on the terminal with the cross-platform open-source .NET framework  mono.
+MS_targeted is an open-source command-line pipeline for statistical analysis of mass spectrometry metabolomics data. The pipeline is implemented in C# and R, and runs in all platforms. In Windows you can run it on cmd.exe, while in OSX and Linux on the terminal with the cross-platform open-source .NET framework [mono](https://www.mono-project.com/).
 MS_targeted can handle multiple tissues and charges simultaneously.
 
 **For any questions or issues please use the Issues in github or contact Klev Diamanti.**
@@ -27,6 +27,6 @@ This is a meta-data file that contains various database id's for thousands of me
 #### conf_file
 This file configures various parameters for MS_targeted. The sample file under [MS_targeted/sample_data/conf/](MS_targeted/sample_data/conf/) contains comments and details.
 #### output_dir
-An existing or not existing output directory  where all the output files will be written. Please note that if the directory exists it will be overwritten.
+An existing or not existing output directory where all the output files will be written. Please note that if the directory exists it will be overwritten.
 ## Citation
 Klev Diamanti, Marco Cavalli, Gang Pan, Maria João Pereira, Chanchal Kumar, Stanko Skrtic, Manfred Grabherr, Ulf Risérus, Jan W Eriksson, Jan Komorowski and Claes Wadelius (2018). "Metabolic landscape of five tissues suggests new molecular defects in type-2 diabetes". Submitted.
