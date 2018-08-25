@@ -20,17 +20,17 @@ The first row contains: Type, ID, Tissue, Charge. The first 29 rows for these co
   - RT: retention time of the metabolite in the corresponding column (provided from computational annotation).
   - m_ID: custom ID of each metabolite in the corresponding column. This ID is provided by the user and is internally used to mark unique metabolites. The name should be alpharithemtic and contain at least one character [a-z, A-Z].
   - CAS_ID: Chemical Abstracts Service (CAS) registry number of the metabolite in the corresponding column.
-  - ALT_CAS_ID: additional or alternative Chemical Abstracts Service (CAS) registry number of the metabolite in the corresponding column.
-  - HMDB_ID:
-  - ALT_HMDB_ID:
-  - KEGG_ID:
-  - ALT_KEGG_ID:
-  - ChEBI_ID:
-  - ALT_ChEBI_ID:
-  - PUBCHEM_ID:
-  - ALT_PUBCHEM_ID:
-  - CHEMSPIDER_ID:
-  - ALT_CHEMSPIDER_IS:
+  - ALT_CAS_ID: additional or alternative Chemical Abstracts Service (CAS) registry numbers of the metabolite in the corresponding column.
+  - HMDB_ID: Human Metabolome Database [(HMDB)](http://www.hmdb.ca/) ID of the metabolite in the corresponding column.
+  - ALT_HMDB_ID: additional or alternative Human Metabolome Database [(HMDB)](http://www.hmdb.ca/) IDs of the metabolite in the corresponding column.
+  - KEGG_ID: Kyoto Encyclopedia of Genes and Genomes [(KEGG)-compound](https://www.kegg.jp/kegg/compound/) ID of the metabolite in the corresponding column.
+  - ALT_KEGG_ID: additional or alternative Kyoto Encyclopedia of Genes and Genomes [(KEGG)-compound](https://www.kegg.jp/kegg/compound/) IDs of the metabolite in the corresponding column.
+  - ChEBI_ID: Chemical Entities of Biological Interest [(ChEBI)](https://www.ebi.ac.uk/chebi/) ID of the metabolite in the corresponding column.
+  - ALT_ChEBI_ID: additional or alternative Chemical Entities of Biological Interest [(ChEBI)](https://www.ebi.ac.uk/chebi/) IDs of the metabolite in the corresponding column.
+  - PUBCHEM_ID: [PubChem](https://pubchem.ncbi.nlm.nih.gov/) ID of the metabolite in the corresponding column.
+  - ALT_PUBCHEM_ID: additional or alternative [PubChem](https://pubchem.ncbi.nlm.nih.gov/) IDs of the metabolite in the corresponding column.
+  - CHEMSPIDER_ID: [ChemSpider](http://www.chemspider.com/) ID of the metabolite in the corresponding column.
+  - ALT_CHEMSPIDER_ID: additional or alternative [ChemSpider](http://www.chemspider.com/) IDs of the metabolite in the corresponding column.
   - LIPIDMAPS_ID:
   - ALT_LIPIDMAPS_ID:
   - METLIN_ID:
