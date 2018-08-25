@@ -15,7 +15,7 @@
 ## input ms data files
 This input is a directory that contains various data files with the same prefix prior to the first underscore (_) of the file name and the same suffix (e.g. file1: lcms_serum.tsv; file2: lcms_urine.tsv; file3: lcms_saliva.tsv). The input ms data files contain the metabolites' details and intensities detected from mass-spectrometry and computational annotations. The first 29 rows of the file contain metadata for the detected metabolites and the next N rows contain the levels of the metaolites for the respective samples (N is the numer of samples). We will split this section into two sub-sections:
 
-### metabolite metadata: rows 1 to 29
+### subsection 1: metabolite metadata: rows 1 to 29
 The first 4 columns of the first row contain: Type, ID, Tissue, Charge. The first 29 rows for these columns are to navigate the user. The columns 5 to M of the first row (M = number of detected metabolites) contain the names of the detected metabolites. The rest columns and rows are explained below:
 *Note that options marked with '\*' are obligatory while the rest optional.*
 - \*Type\*: type for rows 2-29 is always "Meta".
@@ -51,7 +51,7 @@ The first 4 columns of the first row contain: Type, ID, Tissue, Charge. The firs
 - \*Tissue\*: tissue for rows 2-29 contains always the name of the corresponding tissue.
 - \*Charge\*: charge for rows 2-29 contains always the name of the charge detection in the corresponding tissue. (e.g. positive or negative for LC-MS, or none for GCMS or MIXED).
 
-### metabolite levels: rows 30 to N (N = number of samples)
+### subsection 2: metabolite levels: rows 30 to N (N = number of samples)
 The first 4 columns of the first row contain: Type, ID, Tissue, Charge. There is one row for each sample. The columns 5 to M (M = number of detected metabolites) contain the levels of the detected metabolites on the corresponding sample. *Note that options marked with '\*' are obligatory while the rest optional.*
 - \*Type\*: type for these rows should always be "Sample".
 - \*ID\*: sample ID.
