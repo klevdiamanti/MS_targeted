@@ -3,14 +3,14 @@
 **For detailed explanation on the output files please check [MS_targeted_output.md](MS_targeted_output.md)**
 
 **Input file-formats and directories explained in this section**
-- [input ms data file](MS_targeted_input.md#input-ms-data-file) [example](MS_targeted/sample_data/input_ms/gcms_adams_plasma.tsv
-)
-- [metadata file](MS_targeted_input.md#metadata-file) [example](MS_targeted/sample_data/metadata/gcms_fiehn_metadata.tsv
-)
-- [configuration file](MS_targeted_input.md#configuration-file) [example](MS_targeted/sample_data/conf/MS_targeted.conf
-)
-- [MS_targeted custom database file](MS_targeted_input.md#ms_targeted-custom-database-file) [example](MS_targeted/sample_data/db/20171204_metabolites_db.tsv.zip
-)
+- [input ms data file](MS_targeted_input.md#input-ms-data-file) \[[example](MS_targeted/sample_data/input_ms/gcms_adams_plasma.tsv
+)\]
+- [metadata file](MS_targeted_input.md#metadata-file) \[[example](MS_targeted/sample_data/metadata/gcms_fiehn_metadata.tsv
+)\]
+- [configuration file](MS_targeted_input.md#configuration-file) \[[example](MS_targeted/sample_data/conf/MS_targeted.conf
+)\]
+- [MS_targeted custom database file](MS_targeted_input.md#ms_targeted-custom-database-file) \[[example](MS_targeted/sample_data/db/20171204_metabolites_db.tsv.zip
+)\]
 
 ## input ms data files
 This input is a directory that contains various data files with the same prefix prior to the first underscore (_) of the file name and the same suffix (e.g. file1: lcms_serum.tsv; file2: lcms_urine.tsv; file3: lcms_saliva.tsv). The input ms data files contain the metabolites' details and intensities detected from mass-spectrometry and computational annotations. The first 29 rows of the file contain metadata for the detected metabolites and the next N rows contain the levels of the metaolites for the respective samples (N is the numer of samples). We will split this section into two sub-sections:
