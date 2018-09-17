@@ -42,10 +42,15 @@ namespace MS_targeted
             Tuple<double, double> corrPval;
             corrValCoords _corrValCoord;
 
-            foreach (string typeOfClinicalData in metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfNumClinicalData.Select(x => x.name))
+            foreach (sampleForTissueAndCharge.sampleClinicalData sClinData in metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfNumClinicalData)
             {
+                if (sClinData.typeOf == sampleForTissueAndCharge.sampleClinicalData.type.categorical)
+                {
+                    continue;
+                }
+                
                 //open the pdf stream
-                rEngineInstance.engine.Evaluate(@"pdf(file=""" + outputFile.Replace("\\", "/") + typeOfClinicalData + @".pdf"", width=14, height=9)");
+                rEngineInstance.engine.Evaluate(@"pdf(file=""" + outputFile.Replace("\\", "/") + sClinData.name + @".pdf"", width=14, height=9)");
 
                 //loop over custom metabolite IDs
                 foreach (string mtblid in metaboliteLevels.List_SampleForTissueAndCharge.SelectMany(x => x.ListOfMetabolites).Select(x => x.mtbltDetails.In_customId).Distinct().OrderBy(x => x))
@@ -79,13 +84,13 @@ namespace MS_targeted
                                     phenoMetabValPairs.Add(new rDataFrame(){
                                             phenotype = sftac.Phenotype,
                                             metabolite = sftac.ListOfMetabolites.First(x => x.mtbltDetails.In_customId == mtbl.In_customId).mtbltVals.Imputed,
-                                            clinical_data = sftac.ListOfNumClinicalData.First(x => x.name == typeOfClinicalData).n_value
+                                            clinical_data = sftac.ListOfNumClinicalData.First(x => x.name == sClinData.name).n_value
                                     });
                                 }
 
                                 //retrieve correlation value and p-value between metabolite and clinical data
                                 corrPval = metaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge && !publicVariables.excludedPhenotypes.Contains(x.Phenotype))
-                                    .ListOfMetabolites.First(x => x.mtbltDetails.In_customId == mtbl.In_customId).mtbltDetails.ListOfStats.CorrelationValues.Where(x => x.clinical_data_name == typeOfClinicalData)
+                                    .ListOfMetabolites.First(x => x.mtbltDetails.In_customId == mtbl.In_customId).mtbltDetails.ListOfStats.CorrelationValues.Where(x => x.clinical_data_name == sClinData.name)
                                     .Select(x => new Tuple<double, double>(Math.Round(x.corr_value, 2), x.pValueUnadjust)).ToList().First();
 
                                 //significance symbols and coordinates
@@ -121,7 +126,7 @@ namespace MS_targeted
                     }
                     //do the plot
                     rEngineInstance.engine.Evaluate(@"" + printBoxPlotGrid(metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Charge).Distinct().Count(), metaboliteLevels.List_SampleForTissueAndCharge.Select(x => x.Tissue).Distinct().Count()) +
-                            @"p <- grid.text(""x-" + typeOfClinicalData + @" | y-" + mtbl.In_customId + @"_" + mtbl.In_Name + @""", x=unit(10,""mm""), y=unit(225,""mm""), just=c(""left"", ""top""), gp = gpar(fontface=""bold"", fontsize=24, col=""blue""));
+                            @"p <- grid.text(""x-" + sClinData.name + @" | y-" + mtbl.In_customId + @"_" + mtbl.In_Name + @""", x=unit(10,""mm""), y=unit(225,""mm""), just=c(""left"", ""top""), gp = gpar(fontface=""bold"", fontsize=24, col=""blue""));
                     print(p);");
                 }
                 rEngineInstance.engine.Evaluate(@"dev.off()");

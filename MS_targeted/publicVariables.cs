@@ -842,7 +842,7 @@ namespace MS_targeted
                                 #endregion
                                 break;
                             default:
-                                outputToLog.WriteErrorLine("Parameter " + line.Split('\t').First() + " from configuration file was not correct");
+                                outputToLog.WriteErrorLine("The term " + line.Split('\t').First() + " from configuration file was cannot be recognized");
                                 break;
                         }
                     }
