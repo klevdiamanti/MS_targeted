@@ -348,13 +348,15 @@ namespace MS_targeted
                     }
                     pairwiseTest = pairwiseTest.Substring(0, pairwiseTest.Length - 1);
 
-                    output.WriteLine(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}{0}{14}{0}{15}{0}{16}",
+                    output.WriteLine(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}{0}{14}{0}{15}{0}{16}{0}{17}{0}{18}",
                                                   publicVariables.breakCharInFile,
                                                   "BiochemicalName",
                                                   "Formula",
                                                   "Kingdom",
                                                   "SuperClass",
                                                   "Class",
+                                                  "cClass",
+                                                  "cSuperClass",
                                                   "Platform",
                                                   "Charge",
                                                   pairwiseTest,
@@ -383,13 +385,15 @@ namespace MS_targeted
                             }
                             pairwiseTest = pairwiseTest.Substring(0, pairwiseTest.Length - 1);
 
-                            output.WriteLine(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}{0}{14}{0}{15}{0}{16}",
+                            output.WriteLine(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}{0}{14}{0}{15}{0}{16}{0}{17}{0}{18}",
                                               publicVariables.breakCharInFile,
                                               metabolitePerPathway.In_AZmNameFixed,
                                               metabolitePerPathway.In_Formula,
                                               metabolitePerPathway.My_taxonomy.Kingdom,
                                               metabolitePerPathway.My_taxonomy.Super_class,
                                               metabolitePerPathway.My_taxonomy.Tclass,
+                                              metabolitePerPathway.In_AZmClass,
+                                              metabolitePerPathway.In_AZmSuperClass,
                                               publicVariables.prefix.ToString().ToUpper(),
                                               charge,
                                               pairwiseTest,
@@ -504,10 +508,12 @@ namespace MS_targeted
             {
                 using (TextWriter output = new StreamWriter(@"" + corrsCovsFilePrefix + "_" + tissue + publicVariables.suffix))
                 {
-                    output.WriteLine(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}",
+                    output.WriteLine(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}",
                         publicVariables.breakCharInFile,
                         "BiochemicalName",
                         "Formula",
+                        "cClass",
+                        "cSuperClass",
                         "Platform",
                         "Charge",
                         string.Join(publicVariables.breakCharInFile.ToString(),
@@ -525,10 +531,12 @@ namespace MS_targeted
                     {
                         foreach (msMetabolite mtbl in metaboliteLevels.List_SampleForTissueAndCharge.First(x => x.Tissue == tissue && x.Charge == charge).ListOfMetabolites.Select(x => x.mtbltDetails))
                         {
-                            output.WriteLine(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}",
+                            output.WriteLine(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}",
                                 publicVariables.breakCharInFile,
                                 mtbl.In_Name,
                                 mtbl.In_Formula,
+                                mtbl.In_AZmClass,
+                                mtbl.In_AZmSuperClass,
                                 publicVariables.prefix.ToString().ToUpper(),
                                 charge,
                                 string.Join(publicVariables.breakCharInFile.ToString(),
