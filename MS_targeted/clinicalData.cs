@@ -26,7 +26,7 @@ namespace MS_targeted
             using (TextReader input = new StreamReader(@"" + publicVariables.clinicalDataFile))
             {
                 #region set covariate indecies
-                List<string> covariate_names = input.ReadLine().Split(publicVariables.breakCharInFile).Select(x => x.ToLower()).ToList(),
+                List<string> covariate_names = input.ReadLine().Split(publicVariables.breakCharInFile).Select(x => x.ToLower().Replace("-", "_").Replace(" ", "_").Replace("=", "_")).ToList(),
                     covariate_types = input.ReadLine().Split(publicVariables.breakCharInFile).Select(x => x.ToLower()).ToList();
 
                 #region check headers and types of metadata

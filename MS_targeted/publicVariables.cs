@@ -558,7 +558,7 @@ namespace MS_targeted
                                 #region set CovarCorrelate
                                 if (!string.IsNullOrEmpty(line.Split('\t').ElementAt(1)) && !string.IsNullOrWhiteSpace(line.Split('\t').ElementAt(1)))
                                 {
-                                    normCovars = line.Split('\t').ElementAt(1).Split(',').Select(x => x.ToLower()).ToList();
+                                    normCovars = line.Split('\t').ElementAt(1).Split(',').Select(x => x.ToLower().Replace("-", "_").Replace(" ", "_").Replace("=", "_")).ToList();
                                     normCovarsIsSet = true;
                                     outputToLog.WriteLine("CovarCorrelate was successfully set");
                                 }
@@ -574,9 +574,9 @@ namespace MS_targeted
                                 #region set CovarSampleWeight
                                 if (!string.IsNullOrEmpty(line.Split('\t').ElementAt(1)) && !string.IsNullOrWhiteSpace(line.Split('\t').ElementAt(1)))
                                 {
-                                    sampleWeight = line.Split('\t').ElementAt(1).Split(',')
-                                    .Select(x => new Tuple<string, string, string>
-                                    (x.Split('#').First().ToLower(), x.Split('#').Last().Split('_').First().ToLower(), x.Split('#').Last().Split('_').Last().ToLower()))
+                                    sampleWeight = line.Split('\t').ElementAt(1).Split(',').Select(x => new Tuple<string, string, string>
+                                    (x.Split('#').First().ToLower().Replace("-", "_").Replace(" ", "_").Replace("=", "_"), x.Split('#').Last().Split('_').First().ToLower(),
+                                    x.Split('#').Last().Split('_').Last().ToLower()))
                                     .ToList();
                                     sampleWeightIsSet = true;
                                     outputToLog.WriteLine("CovarSampleWeight was successfully set");
