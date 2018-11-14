@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace MS_targeted
@@ -268,11 +269,11 @@ namespace MS_targeted
                                         // add a new covariate
                                         if (scd.typeOf == sampleForTissueAndCharge.sampleClinicalData.type.numeric)
                                         {
-                                            listOfCovars.Add(new clinicalDataVals(ncv, pheno, scd.n_value, null));
+                                            listOfCovars.Add(new clinicalDataVals(ncv, pheno, scd.n_value, null, sampleId));
                                         }
                                         else if (scd.typeOf == sampleForTissueAndCharge.sampleClinicalData.type.categorical)
                                         {
-                                            listOfCovars.Add(new clinicalDataVals(ncv, pheno, -1, scd.c_value));
+                                            listOfCovars.Add(new clinicalDataVals(ncv, pheno, -1, scd.c_value, sampleId));
                                         }
                                     }
                                 }
@@ -366,7 +367,43 @@ namespace MS_targeted
                             }
                         }
 
-                        //linear regression model between metabolite levels and HbA1c
+                        IEnumerable[] s = new IEnumerable[publicVariables.cofCovars.Count];
+                        List<string> stype = new List<string>();
+                        int cnt = 0;
+                        foreach (string cf in publicVariables.cofCovars)
+                        {
+                            if (listOfCovars.Any(x => x.covarName == cf))
+                            {
+                                if (listOfCovars.First(x => x.covarName == cf).typeOf == clinicalDataVals.type.numeric)
+                                {
+                                    List<double> sAddNum = new List<double>();
+                                    foreach (List<double> san in listOfCovars.First(x => x.covarName == cf).n_dictOfVals.Select(x => x.Value.ToList()).ToList())
+                                    {
+                                        sAddNum.AddRange(san);
+                                    }
+                                    s.SetValue(sAddNum.ToArray(), cnt);
+                                    stype.Add("number");
+                                    cnt++;
+                                }
+                                else if (listOfCovars.First(x => x.covarName == cf).typeOf == clinicalDataVals.type.categorical)
+                                {
+                                    List<string> sAddCat = new List<string>();
+                                    foreach (List<string> sac in listOfCovars.First(x => x.covarName == cf).c_dictOfVals.Select(x => x.Value.ToList()).ToList())
+                                    {
+                                        sAddCat.AddRange(sac);
+                                    }
+                                    s.SetValue(sAddCat.ToArray(), cnt);
+                                    stype.Add("factor");
+                                    cnt++;
+                                }
+                            }
+                            else
+                            {
+                                outputToLog.WriteWarningLine("Cofounder " + cf + " was not found among the covariates");
+                            }
+                        }
+
+                        //linear regression model between metabolite levels and cofounders
                         foreach (clinicalDataVals nv in listOfCovars)
                         {
                             if (nv.typeOf == clinicalDataVals.type.numeric)
@@ -383,7 +420,7 @@ namespace MS_targeted
                                 else
                                 {
                                     permutationTest.returnIEnurableNumeric(nv.n_dictOfVals.Select(x => x.Value.ToArray()).ToList(), metabolite_values);
-                                    regressionVals.Add(permutationTest.linearRegressionTest(new string[] { nv.covarName, custid }, "number"));
+                                    regressionVals.Add(permutationTest.linearRegressionTest(new string[] { nv.covarName, custid }, "number", s, stype));
                                 }
                             }
                             else if (nv.typeOf == clinicalDataVals.type.categorical)
@@ -400,7 +437,7 @@ namespace MS_targeted
                                 else
                                 {
                                     permutationTest.returnIEnurableCategoric(nv.c_dictOfVals.Select(x => x.Value.ToArray()).ToList(), metabolite_values);
-                                    regressionVals.Add(permutationTest.linearRegressionTest(new string[] { nv.covarName, custid }, "factor"));
+                                    regressionVals.Add(permutationTest.linearRegressionTest(new string[] { nv.covarName, custid }, "factor", s, stype));
                                 }
                             }
                         }
@@ -442,12 +479,14 @@ namespace MS_targeted
                 categorical
             }
             public type typeOf { get; set; }
+            public string sampleID { get; set; }
 
             // in order to add a numeric value send _cv argument as null
             // for the opposite send the _nv argument as null
-            public clinicalDataVals(string _cn, string _pheno, double _nv, string _cv)
+            public clinicalDataVals(string _cn, string _pheno, double _nv, string _cv, string _sid)
             {
                 covarName = _cn;
+                sampleID = _sid;
                 if (string.IsNullOrEmpty(_cv) || string.IsNullOrWhiteSpace(_cv))
                 {
                     n_dictOfVals = new Dictionary<string, List<double>>() { { _pheno, new List<double>() { _nv } } };

@@ -66,6 +66,10 @@ namespace MS_targeted
         public static List<string> normCovars { get; set; }
         private static bool normCovarsIsSet = false;
 
+        //cofounder covars
+        public static List<string> cofCovars { get; set; }
+        private static bool cofCovarsIsSet = false;
+
         //sample weight covariates
         public static List<Tuple<string, string, string>> sampleWeight { get; set; }
         private static bool sampleWeightIsSet = false;
@@ -589,6 +593,22 @@ namespace MS_targeted
                                 }
                                 #endregion
                                 break;
+                            case "Cofounders":
+                                #region set Cofounders
+                                if (!string.IsNullOrEmpty(line.Split('\t').ElementAt(1)) && !string.IsNullOrWhiteSpace(line.Split('\t').ElementAt(1)))
+                                {
+                                    cofCovars = line.Split('\t').ElementAt(1).Split(',').Select(x => x.ToLower().Replace("-", "_").Replace(" ", "_").Replace("=", "_")).ToList();
+                                    cofCovarsIsSet = true;
+                                    outputToLog.WriteLine("Cofounders was successfully set");
+                                }
+                                else
+                                {
+                                    cofCovarsIsSet = true;
+                                    cofCovars = new List<string>();
+                                    outputToLog.WriteWarningLine("Cofounders was successfully set as empty");
+                                }
+                                #endregion
+                                break;
                             case "CovarId":
                                 #region set CovarId
                                 if (!string.IsNullOrEmpty(line.Split('\t').ElementAt(1)) && !string.IsNullOrWhiteSpace(line.Split('\t').ElementAt(1)))
@@ -897,6 +917,10 @@ namespace MS_targeted
             else if (!sampleWeightIsSet)
             {
                 outputToLog.WriteErrorLine("CovarSampleWeight has not been set in the configuration file. It can be set to empty/NULL too");
+            }
+            else if (!cofCovarsIsSet)
+            {
+                outputToLog.WriteErrorLine("Cofounders has not been set in the configuration file. It can be set to empty/NULL too");
             }
             else if (!sampleIdIsSet)
             {

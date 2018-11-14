@@ -130,12 +130,17 @@ namespace MS_targeted
             return Math.Round(wmw_pValue, 5);
         }
 
-        public static msMetabolite.stats.regressValues linearRegressionTest(string[] columnNames, string _typeof)
+        public static msMetabolite.stats.regressValues linearRegressionTest(string[] columnNames, string _typeof, IEnumerable[] ie_cofounders, List<string> cof_typeof)
         {
             //block (intercept) REngine from printing to the Console
             //we are just redirecting the output of it to some StringWriter
             var stdOut = Console.Out;
             Console.SetOut(new StringWriter());
+
+            //create the cofounder data frame
+            DataFrame cofounders = rEngineInstance.engine.CreateDataFrame(ie_cofounders, columnNames: publicVariables.cofCovars.ToArray());
+            rEngineInstance.engine.SetSymbol("cofounders", cofounders);
+            string cof_string = covarsDf(cof_typeof);
 
             //create the data frame
             DataFrame df = rEngineInstance.engine.CreateDataFrame(dataFrameValues, columnNames: columnNames);
@@ -148,7 +153,7 @@ namespace MS_targeted
             //run permutation test and take the pvalue
             if (_typeof == "factor")
             {
-                rEngineInstance.engine.Evaluate(string.Format("myres <- summary(lmp(as.numeric(df[,'{0}']) ~ as.factor(df[,'{1}']), perm = \"{2}\", seqs = {3}, " +
+                rEngineInstance.engine.Evaluate(string.Format("myres <- summary(lmp(as.numeric(df[,'{0}']) ~ as.factor(df[,'{1}'])" + cof_string + ", perm = \"{2}\", seqs = {3}, " +
                     "center = {4}, projections = {5}, qr = {6}, maxIter = {7}, nCycle = {8}))",
                         columnNames[1],
                         columnNames[0],
@@ -162,7 +167,7 @@ namespace MS_targeted
             }
             else if (_typeof == "number")
             {
-                rEngineInstance.engine.Evaluate(string.Format("myres <- summary(lmp(as.numeric(df[,'{0}']) ~ as.numeric(df[,'{1}']), perm = \"{2}\", seqs = {3}, " +
+                rEngineInstance.engine.Evaluate(string.Format("myres <- summary(lmp(as.numeric(df[,'{0}']) ~ as.numeric(df[,'{1}'])" + cof_string + ", perm = \"{2}\", seqs = {3}, " +
                     "center = {4}, projections = {5}, qr = {6}, maxIter = {7}, nCycle = {8}))",
                         columnNames[1],
                         columnNames[0],
@@ -185,9 +190,30 @@ namespace MS_targeted
             return new msMetabolite.stats.regressValues()
             {
                 clinical_data_name = columnNames.First(),
-                regrPvalue = Math.Round(rEngineInstance.engine.Evaluate("myres$coefficients[6]").AsNumeric().First(), 5),
+                regrPvalue = Math.Round(rEngineInstance.engine.Evaluate("myres$coefficients[2,3]").AsNumeric().First(), 5),
                 regrAdjRsquare = Math.Round(rEngineInstance.engine.Evaluate("myres$adj.r.squared").AsNumeric().First(), 5)
             };
+        }
+
+        private static string covarsDf(List<string> _typeof)
+        {
+            string s = @"";
+            for (int i = 0; i < _typeof.Count; i++)
+            {
+                if (_typeof[i] == "factor")
+                {
+                    s += string.Format(@" + as.factor(cofounders[,'{0}'])", publicVariables.cofCovars[i]);
+                }
+                else if (_typeof[i] == "number")
+                {
+                    s += string.Format(@" + as.numeric(cofounders[,'{0}'])", publicVariables.cofCovars[i]);
+                }
+                else
+                {
+                    outputToLog.WriteErrorLine("Regression failed");
+                }
+            }
+            return(s);
         }
 
         /// <summary>
