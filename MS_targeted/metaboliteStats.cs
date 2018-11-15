@@ -406,38 +406,41 @@ namespace MS_targeted
                         //linear regression model between metabolite levels and cofounders
                         foreach (clinicalDataVals nv in listOfCovars)
                         {
-                            if (nv.typeOf == clinicalDataVals.type.numeric)
+                            if (!publicVariables.cofCovars.Contains(nv.covarName))
                             {
-                                if (nv.n_dictOfVals.SelectMany(x => x.Value).Distinct().Count() == 1)
+                                if (nv.typeOf == clinicalDataVals.type.numeric)
                                 {
-                                    regressionVals.Add(new msMetabolite.stats.regressValues()
+                                    if (nv.n_dictOfVals.SelectMany(x => x.Value).Distinct().Count() == 1)
                                     {
-                                        clinical_data_name = nv.covarName,
-                                        regrAdjRsquare = 0,
-                                        regrPvalue = 1
-                                    });
-                                }
-                                else
-                                {
-                                    permutationTest.returnIEnurableNumeric(nv.n_dictOfVals.Select(x => x.Value.ToArray()).ToList(), metabolite_values);
-                                    regressionVals.Add(permutationTest.linearRegressionTest(new string[] { nv.covarName, custid }, "number", s, stype));
-                                }
-                            }
-                            else if (nv.typeOf == clinicalDataVals.type.categorical)
-                            {
-                                if (nv.c_dictOfVals.SelectMany(x => x.Value).Distinct().Count() == 1)
-                                {
-                                    regressionVals.Add(new msMetabolite.stats.regressValues()
+                                        regressionVals.Add(new msMetabolite.stats.regressValues()
+                                        {
+                                            clinical_data_name = nv.covarName,
+                                            regrAdjRsquare = 0,
+                                            regrPvalue = 1
+                                        });
+                                    }
+                                    else
                                     {
-                                        clinical_data_name = nv.covarName,
-                                        regrAdjRsquare = 0,
-                                        regrPvalue = 1
-                                    });
+                                        permutationTest.returnIEnurableNumeric(nv.n_dictOfVals.Select(x => x.Value.ToArray()).ToList(), metabolite_values);
+                                        regressionVals.Add(permutationTest.linearRegressionTest(new string[] { nv.covarName, custid }, "number", s, stype));
+                                    }
                                 }
-                                else
+                                else if (nv.typeOf == clinicalDataVals.type.categorical)
                                 {
-                                    permutationTest.returnIEnurableCategoric(nv.c_dictOfVals.Select(x => x.Value.ToArray()).ToList(), metabolite_values);
-                                    regressionVals.Add(permutationTest.linearRegressionTest(new string[] { nv.covarName, custid }, "factor", s, stype));
+                                    if (nv.c_dictOfVals.SelectMany(x => x.Value).Distinct().Count() == 1)
+                                    {
+                                        regressionVals.Add(new msMetabolite.stats.regressValues()
+                                        {
+                                            clinical_data_name = nv.covarName,
+                                            regrAdjRsquare = 0,
+                                            regrPvalue = 1
+                                        });
+                                    }
+                                    else
+                                    {
+                                        permutationTest.returnIEnurableCategoric(nv.c_dictOfVals.Select(x => x.Value.ToArray()).ToList(), metabolite_values);
+                                        regressionVals.Add(permutationTest.linearRegressionTest(new string[] { nv.covarName, custid }, "factor", s, stype));
+                                    }
                                 }
                             }
                         }

@@ -68,6 +68,8 @@ namespace MS_targeted
                 pValueUnadjust = pNumUnadjust[clinDataNames.IndexOf(i)]
             }));
 
+            rEngineInstance.engine.Evaluate("rm(ms, df, corr_res)");
+
             //Re-enable Console printings
             Console.SetOut(stdOut);
 
@@ -150,7 +152,7 @@ namespace MS_targeted
                     });
                 }
             }
-
+            rEngineInstance.engine.Evaluate("rm(ms, df, corr_res)");
             //Re-enable Console printings
             Console.SetOut(stdOut);
 

@@ -38,6 +38,7 @@ namespace MS_targeted
                 publicVariables.numberOfPermutations,
                 (publicVariables.numberOfPermutations / 1000).ToString())).AsNumeric().First();
 
+            rEngineInstance.engine.Evaluate("rm(df)");
             //Re-enable Console printings
             Console.SetOut(stdOut);
 
@@ -66,6 +67,7 @@ namespace MS_targeted
                 publicVariables.numberOfPermutations,
                 "FALSE")).AsNumeric().First();
 
+            rEngineInstance.engine.Evaluate("rm(df)");
             //Re-enable Console printings
             Console.SetOut(stdOut);
 
@@ -92,12 +94,12 @@ namespace MS_targeted
                       publicVariables.numberOfPermutations.ToString()));
 
 
-            double kw_pValue = rEngineInstance.engine.Evaluate(@"kwres@distribution@pvalue(kwres@statistic@teststatistic)[1]").AsNumeric().First();
+            rEngineInstance.engine.Evaluate("rm(df)");
 
             //Re-enable Console printings
             Console.SetOut(stdOut);
 
-            return Math.Round(kw_pValue, 5);
+            return Math.Round(rEngineInstance.engine.Evaluate(@"kwres@distribution@pvalue(kwres@statistic@teststatistic)[1]").AsNumeric().First(), 5);
         }
 
         public static double wilcoxonMannWhitneyPermutationTest(string[] columnNames)
@@ -122,12 +124,12 @@ namespace MS_targeted
                       publicVariables.numberOfPermutations.ToString()));
 
 
-            double wmw_pValue = rEngineInstance.engine.Evaluate(@"wmwres@distribution@pvalue(wmwres@statistic@teststatistic)[1]").AsNumeric().First();
-
+            rEngineInstance.engine.Evaluate("rm(df)");
+            
             //Re-enable Console printings
             Console.SetOut(stdOut);
 
-            return Math.Round(wmw_pValue, 5);
+            return Math.Round(rEngineInstance.engine.Evaluate(@"wmwres@distribution@pvalue(wmwres@statistic@teststatistic)[1]").AsNumeric().First(), 5);
         }
 
         public static msMetabolite.stats.regressValues linearRegressionTest(string[] columnNames, string _typeof, IEnumerable[] ie_cofounders, List<string> cof_typeof)
@@ -138,10 +140,13 @@ namespace MS_targeted
             Console.SetOut(new StringWriter());
 
             //create the cofounder data frame
-            DataFrame cofounders = rEngineInstance.engine.CreateDataFrame(ie_cofounders, columnNames: publicVariables.cofCovars.ToArray());
-            rEngineInstance.engine.SetSymbol("cofounders", cofounders);
-            string cof_string = covarsDf(cof_typeof);
-
+            regrCovars rCovar = covarsDf(ie_cofounders, cof_typeof);
+            if (cof_typeof.Count > 0)
+            {
+                DataFrame cofounders = rEngineInstance.engine.CreateDataFrame(rCovar.IEcofounders, columnNames: rCovar.cofounders.ToArray());
+                rEngineInstance.engine.SetSymbol("cofounders", cofounders);
+            }
+            
             //create the data frame
             DataFrame df = rEngineInstance.engine.CreateDataFrame(dataFrameValues, columnNames: columnNames);
             rEngineInstance.engine.SetSymbol("df", df);
@@ -153,28 +158,24 @@ namespace MS_targeted
             //run permutation test and take the pvalue
             if (_typeof == "factor")
             {
-                rEngineInstance.engine.Evaluate(string.Format("myres <- summary(lmp(as.numeric(df[,'{0}']) ~ as.factor(df[,'{1}'])" + cof_string + ", perm = \"{2}\", seqs = {3}, " +
-                    "center = {4}, projections = {5}, qr = {6}, maxIter = {7}, nCycle = {8}))",
+                rEngineInstance.engine.Evaluate(string.Format(@"myres <- summary(lmPerm::lmp(as.numeric(df[,'{0}']) ~ as.factor(df[,'{1}']){2}, perm = ""{3}"", seqs = {4}, " +
+                    @"center = {4}, projections = {4}, qr = {4}, maxIter = {5}, nCycle = {6}))",
                         columnNames[1],
                         columnNames[0],
+                        rCovar.cof_string,
                         "Prob",
-                        "TRUE",
-                        "TRUE",
-                        "TRUE",
                         "TRUE",
                         publicVariables.numberOfPermutations,
                         (publicVariables.numberOfPermutations / 1000).ToString()));
             }
             else if (_typeof == "number")
             {
-                rEngineInstance.engine.Evaluate(string.Format("myres <- summary(lmp(as.numeric(df[,'{0}']) ~ as.numeric(df[,'{1}'])" + cof_string + ", perm = \"{2}\", seqs = {3}, " +
-                    "center = {4}, projections = {5}, qr = {6}, maxIter = {7}, nCycle = {8}))",
+                rEngineInstance.engine.Evaluate(string.Format(@"myres <- summary(lmPerm::lmp(as.numeric(df[,'{0}']) ~ as.numeric(df[,'{1}']){2}, perm = ""{3}"", seqs = {4}, " +
+                    @"center = {4}, projections = {4}, qr = {4}, maxIter = {5}, nCycle = {6}))",
                         columnNames[1],
                         columnNames[0],
+                        rCovar.cof_string,
                         "Prob",
-                        "TRUE",
-                        "TRUE",
-                        "TRUE",
                         "TRUE",
                         publicVariables.numberOfPermutations,
                         (publicVariables.numberOfPermutations / 1000).ToString()));
@@ -184,36 +185,72 @@ namespace MS_targeted
                 outputToLog.WriteErrorLine("Regression failed");
             }
 
+            //rEngineInstance.engine.Evaluate("print(myres)");
+            rEngineInstance.engine.Evaluate("rm(df, cofounders)");
+
             //Re-enable Console printings
             Console.SetOut(stdOut);
 
             return new msMetabolite.stats.regressValues()
             {
                 clinical_data_name = columnNames.First(),
-                regrPvalue = Math.Round(rEngineInstance.engine.Evaluate("myres$coefficients[2,3]").AsNumeric().First(), 5),
+                regrPvalue = Math.Round(rEngineInstance.engine.Evaluate("myres$coefficients[2, 3]").AsNumeric().First(), 5),
                 regrAdjRsquare = Math.Round(rEngineInstance.engine.Evaluate("myres$adj.r.squared").AsNumeric().First(), 5)
             };
         }
 
-        private static string covarsDf(List<string> _typeof)
+        private static regrCovars covarsDf(IEnumerable[] ie_cofounders, List<string> _typeof)
         {
-            string s = @"";
-            for (int i = 0; i < _typeof.Count; i++)
+            int cnt = 0;
+            List<int> indToRemove = new List<int>();
+            foreach (var iec in ie_cofounders)
             {
-                if (_typeof[i] == "factor")
+                if (iec.Cast<object>().ToList().Distinct().Count() == 1)
                 {
-                    s += string.Format(@" + as.factor(cofounders[,'{0}'])", publicVariables.cofCovars[i]);
+                    indToRemove.Add(cnt);
                 }
-                else if (_typeof[i] == "number")
+                cnt++;
+            }
+
+            IEnumerable[] r_cofounders = new IEnumerable[_typeof.Count - indToRemove.Count];
+            int currCnt = 0, addCnt = 0;
+            List<string> r_typeOf = new List<string>(), r_cofCovars = new List<string>();
+            foreach (var iec in ie_cofounders)
+            {
+                if (!indToRemove.Contains(currCnt))
                 {
-                    s += string.Format(@" + as.numeric(cofounders[,'{0}'])", publicVariables.cofCovars[i]);
+                    r_cofounders.SetValue(iec, addCnt);
+                    r_typeOf.Add(_typeof.ElementAt(currCnt));
+                    r_cofCovars.Add(publicVariables.cofCovars.ElementAt(currCnt));
+                    addCnt++;
+                }
+                currCnt++;
+            }
+
+            string s = @"";
+            for (int i = 0; i < r_typeOf.Count; i++)
+            {
+                if (r_typeOf[i] == "factor")
+                {
+                    s += string.Format(@" + as.factor(cofounders[,'{0}'])", r_cofCovars[i]);
+                }
+                else if (r_typeOf[i] == "number")
+                {
+                    s += string.Format(@" + as.numeric(cofounders[,'{0}'])", r_cofCovars[i]);
                 }
                 else
                 {
                     outputToLog.WriteErrorLine("Regression failed");
                 }
             }
-            return(s);
+
+            return (new regrCovars()
+            {
+                cofounders = r_cofCovars,
+                cof_string = s,
+                IEcofounders = r_cofounders,
+                _typeOf = r_typeOf
+            });
         }
 
         /// <summary>
@@ -310,6 +347,14 @@ namespace MS_targeted
             }
 
             dataFrameValues = new IEnumerable[] { my_covariate_values.ToArray(), my_metabolite_values.ToArray() };
+        }
+
+        private class regrCovars
+        {
+            public IEnumerable[] IEcofounders { get; set; }
+            public string cof_string { get; set; }
+            public List<string> _typeOf { get; set; }
+            public List<string> cofounders { get; set; }
         }
     }
 }
