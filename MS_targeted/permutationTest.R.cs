@@ -156,34 +156,16 @@ namespace MS_targeted
             //in case we want to use Exact the we should change the limit of Exact from 10 to something greater by using maxExact = X (where X>10)
             //nCycle performs  a  complete  random  permutation,  instead  of  pairwise  exchanges, every nCycle cycles
             //run permutation test and take the pvalue
-            if (_typeof == "factor")
-            {
-                rEngineInstance.engine.Evaluate(string.Format(@"myres <- summary(lmPerm::lmp(as.numeric(df[,'{0}']) ~ as.factor(df[,'{1}']){2}, perm = ""{3}"", seqs = {4}, " +
-                    @"center = {4}, projections = {4}, qr = {4}, maxIter = {5}, nCycle = {6}))",
+            rEngineInstance.engine.Evaluate(string.Format(@"myres <- summary(lmPerm::lmp(as.numeric(df[,'{0}']) ~ {1}(df[,'{2}']){3}, perm = ""{4}"", seqs = {5}, " +
+                    @"center = {5}, projections = {5}, qr = {5}, maxIter = {6}, nCycle = {7}))",
                         columnNames[1],
+                        (_typeof == "factor") ? "as.factor" : ((_typeof == "number") ? "as.numeric" : "Regression failed"),
                         columnNames[0],
                         rCovar.cof_string,
                         "Prob",
                         "TRUE",
                         publicVariables.numberOfPermutations,
                         (publicVariables.numberOfPermutations / 1000).ToString()));
-            }
-            else if (_typeof == "number")
-            {
-                rEngineInstance.engine.Evaluate(string.Format(@"myres <- summary(lmPerm::lmp(as.numeric(df[,'{0}']) ~ as.numeric(df[,'{1}']){2}, perm = ""{3}"", seqs = {4}, " +
-                    @"center = {4}, projections = {4}, qr = {4}, maxIter = {5}, nCycle = {6}))",
-                        columnNames[1],
-                        columnNames[0],
-                        rCovar.cof_string,
-                        "Prob",
-                        "TRUE",
-                        publicVariables.numberOfPermutations,
-                        (publicVariables.numberOfPermutations / 1000).ToString()));
-            }
-            else
-            {
-                outputToLog.WriteErrorLine("Regression failed");
-            }
 
             //rEngineInstance.engine.Evaluate("print(myres)");
             rEngineInstance.engine.Evaluate("rm(df, cofounders)");
