@@ -74,12 +74,20 @@ namespace MS_targeted
             return Math.Round(ttest_pValue, 5);
         }
 
-        public static double kruskalWallisPermutationTest(string[] columnNames)
+        public static double kruskalWallisPermutationTest(string[] columnNames, IEnumerable[] ie_cofounders, List<string> cof_typeof)
         {
             //block (intercept) REngine from printing to the Console
             //we are just redirecting the output of it to some StringWriter
             var stdOut = Console.Out;
             Console.SetOut(new StringWriter());
+
+            //create the cofounder data frame
+            regrCovars rCovar = covarsDf(ie_cofounders, cof_typeof);
+            if (cof_typeof.Count > 0)
+            {
+                DataFrame cofounders = rEngineInstance.engine.CreateDataFrame(rCovar.IEcofounders, columnNames: rCovar.cofounders.ToArray());
+                rEngineInstance.engine.SetSymbol("cofounders", cofounders);
+            }
 
             //create the data frame
             DataFrame df = rEngineInstance.engine.CreateDataFrame(dataFrameValues, columnNames: columnNames);
@@ -87,10 +95,11 @@ namespace MS_targeted
 
             //Approximative (Monte Carlo) multivariate Kruskal-Wallis test
             //For two samples (phenotypes), the Kruskal-Wallis test is equivalent to the W-M-W (Wilcoxon-Mann-Whitney) test
-            rEngineInstance.engine.Evaluate(string.Format(@"kwres <- independence_test(df[,'{0}'] ~ factor(df[,'{1}']), teststat = ""quadratic"", 
-                distribution = approximate(B = {2}), ytrafo = function(data) trafo(data, numeric_trafo = rank_trafo))",
+            rEngineInstance.engine.Evaluate(string.Format(@"kwres <- independence_test(df[,'{0}']{2} ~ factor(df[,'{1}']), teststat = ""quadratic"", 
+                distribution = approximate(B = {3}), ytrafo = function(data) trafo(data, numeric_trafo = rank_trafo))",
                       columnNames[1],
                       columnNames[0],
+                      rCovar.cof_string,
                       publicVariables.numberOfPermutations.ToString()));
 
 
@@ -102,7 +111,7 @@ namespace MS_targeted
             return Math.Round(rEngineInstance.engine.Evaluate(@"kwres@distribution@pvalue(kwres@statistic@teststatistic)[1]").AsNumeric().First(), 5);
         }
 
-        public static double wilcoxonMannWhitneyPermutationTest(string[] columnNames)
+        public static double wilcoxonMannWhitneyPermutationTest(string[] columnNames, IEnumerable[] ie_cofounders, List<string> cof_typeof)
         {
             //block (intercept) REngine from printing to the Console
             //we are just redirecting the output of it to some StringWriter
@@ -113,14 +122,21 @@ namespace MS_targeted
             DataFrame df = rEngineInstance.engine.CreateDataFrame(dataFrameValues, columnNames: columnNames);
             rEngineInstance.engine.SetSymbol("df", df);
 
-            //independence_test(diffusion$pd ~ diffusion$age, teststat = "quadratic", distribution = approximate(B = 10000))
+            //create the cofounder data frame
+            regrCovars rCovar = covarsDf(ie_cofounders, cof_typeof);
+            if (cof_typeof.Count > 0)
+            {
+                DataFrame cofounders = rEngineInstance.engine.CreateDataFrame(rCovar.IEcofounders, columnNames: rCovar.cofounders.ToArray());
+                rEngineInstance.engine.SetSymbol("cofounders", cofounders);
+            }
 
             //Approximative (Monte Carlo) multivariate Kruskal-Wallis test
             //For two samples (phenotypes), the Kruskal-Wallis test is equivalent to the W-M-W (Wilcoxon-Mann-Whitney) test
-            rEngineInstance.engine.Evaluate(string.Format(@"wmwres <- independence_test(df[,'{0}'] ~ factor(df[,'{1}']), teststat = ""quadratic"", 
-                distribution = approximate(B = {2}))",
+            rEngineInstance.engine.Evaluate(string.Format(@"wmwres <- independence_test(df[,'{0}']{2} ~ factor(df[,'{1}']), teststat = ""quadratic"", 
+                distribution = approximate(B = {3}))",
                       columnNames[1],
                       columnNames[0],
+                      rCovar.cof_string,
                       publicVariables.numberOfPermutations.ToString()));
 
 

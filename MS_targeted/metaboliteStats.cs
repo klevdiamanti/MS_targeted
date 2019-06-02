@@ -131,7 +131,7 @@ namespace MS_targeted
                                             Charge_denominator = charge_denom,
                                             Group1 = phenotypes.ElementAt(i),
                                             Group2 = phenotypes.ElementAt(j),
-                                            PValue = permutationTest.wilcoxonMannWhitneyPermutationTest(new string[] { "Phenotype", "Ratio" })
+                                            PValue = permutationTest.wilcoxonMannWhitneyPermutationTest(new string[] { "Phenotype", "Ratio" }, new IEnumerable[0], new List<string>())
                                         });
                                         metaboliteRatios.ListOfInterMetaboliteConnections.Last().fillInListOfPerSampleRatios(tmpListOfPerSampleRatios.Where(x => x.cid_nom == cid_nom && x.charge_nom == charge_nom && x.cid_denom == cid_denom && x.charge_denom == charge_denom && (x.phenotype == phenotypes.ElementAt(i) || x.phenotype == phenotypes.ElementAt(j)))
                                                     .Select(x => x.sampleID).ToList(), tmpListOfPerSampleRatios.Where(x => x.cid_nom == cid_nom && x.charge_nom == charge_nom && x.cid_denom == cid_denom && x.charge_denom == charge_denom && (x.phenotype == phenotypes.ElementAt(i) || x.phenotype == phenotypes.ElementAt(j)))
@@ -314,6 +314,85 @@ namespace MS_targeted
                             }
                         }
 
+                        // initialize
+                        IEnumerable[] s = new IEnumerable[publicVariables.cofCovars.Count];
+                        List<tmpPerPhenoConfounders> s_pheno = new List<tmpPerPhenoConfounders>();
+                        for (int i = 0; i < phenotypes.Count; i++)
+                        {
+                            for (int j = i + 1; j < phenotypes.Count; j++)
+                            {
+                                s_pheno.Add(new tmpPerPhenoConfounders()
+                                {
+                                    group1 = phenotypes[i],
+                                    group2 = phenotypes[j],
+                                    s_p = new IEnumerable[publicVariables.cofCovars.Count],
+                                    stype = new List<string>()
+                                });
+                            }
+                        }
+                        List<string> stype = new List<string>();
+                        int cnt = 0;
+                        foreach (string cf in publicVariables.cofCovars)
+                        {
+                            if (listOfCovars.Any(x => x.covarName == cf))
+                            {
+                                if (listOfCovars.First(x => x.covarName == cf).typeOf == clinicalDataVals.type.numeric)
+                                {
+                                    List<double> sAddNum = new List<double>();
+                                    foreach (List<double> san in listOfCovars.First(x => x.covarName == cf).n_dictOfVals.Select(x => x.Value.ToList()).ToList())
+                                    {
+                                        sAddNum.AddRange(san);
+                                    }
+                                    s.SetValue(sAddNum.ToArray(), cnt);
+                                    stype.Add("number");
+
+                                    for (int i = 0; i < phenotypes.Count; i++)
+                                    {
+                                        for (int j = i + 1; j < phenotypes.Count; j++)
+                                        {
+                                            sAddNum = listOfCovars.First(x => x.covarName == cf).n_dictOfVals
+                                                .Where(x => x.Key == phenotypes[i]).Select(x => x.Value.ToList()).ToList().First();
+                                            sAddNum.AddRange(listOfCovars.First(x => x.covarName == cf).n_dictOfVals
+                                                .Where(x => x.Key == phenotypes[j]).Select(x => x.Value.ToList()).ToList().First());
+                                            s_pheno.First(x => x.group1 == phenotypes[i] && x.group2 == phenotypes[j]).s_p.SetValue(sAddNum.ToArray(), cnt);
+                                            s_pheno.First(x => x.group1 == phenotypes[i] && x.group2 == phenotypes[j]).stype.Add("number");
+                                        }
+                                    }
+
+                                    cnt++;
+                                }
+                                else if (listOfCovars.First(x => x.covarName == cf).typeOf == clinicalDataVals.type.categorical)
+                                {
+                                    List<string> sAddCat = new List<string>();
+                                    foreach (List<string> sac in listOfCovars.First(x => x.covarName == cf).c_dictOfVals.Select(x => x.Value.ToList()).ToList())
+                                    {
+                                        sAddCat.AddRange(sac);
+                                    }
+                                    s.SetValue(sAddCat.ToArray(), cnt);
+                                    stype.Add("factor");
+
+                                    for (int i = 0; i < phenotypes.Count; i++)
+                                    {
+                                        for (int j = i + 1; j < phenotypes.Count; j++)
+                                        {
+                                            sAddCat = listOfCovars.First(x => x.covarName == cf).c_dictOfVals
+                                                .Where(x => x.Key == phenotypes[i]).Select(x => x.Value.ToList()).ToList().First();
+                                            sAddCat.AddRange(listOfCovars.First(x => x.covarName == cf).c_dictOfVals
+                                                .Where(x => x.Key == phenotypes[j]).Select(x => x.Value.ToList()).ToList().First());
+                                            s_pheno.First(x => x.group1 == phenotypes[i] && x.group2 == phenotypes[j]).s_p.SetValue(sAddCat.ToArray(), cnt);
+                                            s_pheno.First(x => x.group1 == phenotypes[i] && x.group2 == phenotypes[j]).stype.Add("factor");
+                                        }
+                                    }
+
+                                    cnt++;
+                                }
+                            }
+                            else
+                            {
+                                outputToLog.WriteWarningLine("Cofounder " + cf + " was not found among the covariates");
+                            }
+                        }
+
                         //loop over the phenotypes in order to get all potential pairs of phenotypes
                         //calculate the ratio for imputed and non-imputed values for pair-wise phenotypes, and store them in the corresponding lists of tuples
                         //calculate the p-value for imputed and non-imputed values for pair-wise phenotypes, and store them in the corresponding lists of tuples
@@ -337,7 +416,9 @@ namespace MS_targeted
                                 {
                                     group1 = phenotypes.ElementAt(i),
                                     group2 = phenotypes.ElementAt(j),
-                                    pairValue = permutationTest.wilcoxonMannWhitneyPermutationTest(phenotypeColumnNames)
+                                    pairValue = permutationTest.wilcoxonMannWhitneyPermutationTest(phenotypeColumnNames,
+                                        s_pheno.First(x => x.group1 == phenotypes.ElementAt(i) && x.group2 == phenotypes.ElementAt(j)).s_p,
+                                        s_pheno.First(x => x.group1 == phenotypes.ElementAt(i) && x.group2 == phenotypes.ElementAt(j)).stype)
                                 });
                             }
                         }
@@ -352,7 +433,7 @@ namespace MS_targeted
                             }
                             else
                             {
-                                multiGroupTestPvalue = permutationTest.wilcoxonMannWhitneyPermutationTest(phenotypeColumnNames);
+                                multiGroupTestPvalue = permutationTest.wilcoxonMannWhitneyPermutationTest(phenotypeColumnNames, s, stype);
                             }
                         }
                         else
@@ -363,43 +444,7 @@ namespace MS_targeted
                             }
                             else
                             {
-                                multiGroupTestPvalue = permutationTest.kruskalWallisPermutationTest(phenotypeColumnNames);
-                            }
-                        }
-
-                        IEnumerable[] s = new IEnumerable[publicVariables.cofCovars.Count];
-                        List<string> stype = new List<string>();
-                        int cnt = 0;
-                        foreach (string cf in publicVariables.cofCovars)
-                        {
-                            if (listOfCovars.Any(x => x.covarName == cf))
-                            {
-                                if (listOfCovars.First(x => x.covarName == cf).typeOf == clinicalDataVals.type.numeric)
-                                {
-                                    List<double> sAddNum = new List<double>();
-                                    foreach (List<double> san in listOfCovars.First(x => x.covarName == cf).n_dictOfVals.Select(x => x.Value.ToList()).ToList())
-                                    {
-                                        sAddNum.AddRange(san);
-                                    }
-                                    s.SetValue(sAddNum.ToArray(), cnt);
-                                    stype.Add("number");
-                                    cnt++;
-                                }
-                                else if (listOfCovars.First(x => x.covarName == cf).typeOf == clinicalDataVals.type.categorical)
-                                {
-                                    List<string> sAddCat = new List<string>();
-                                    foreach (List<string> sac in listOfCovars.First(x => x.covarName == cf).c_dictOfVals.Select(x => x.Value.ToList()).ToList())
-                                    {
-                                        sAddCat.AddRange(sac);
-                                    }
-                                    s.SetValue(sAddCat.ToArray(), cnt);
-                                    stype.Add("factor");
-                                    cnt++;
-                                }
-                            }
-                            else
-                            {
-                                outputToLog.WriteWarningLine("Cofounder " + cf + " was not found among the covariates");
+                                multiGroupTestPvalue = permutationTest.kruskalWallisPermutationTest(phenotypeColumnNames, s, stype);
                             }
                         }
 
@@ -512,6 +557,14 @@ namespace MS_targeted
             public string charge_denom { get; set; }
             public string phenotype { get; set; }
             public double ratio { get; set; }
+        }
+
+        private class tmpPerPhenoConfounders
+        {
+            public string group1 { get; set; }
+            public string group2 { get; set; }
+            public IEnumerable[] s_p { get; set; }
+            public List<string> stype { get; set; }
         }
     }
 }
