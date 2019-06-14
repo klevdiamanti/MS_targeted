@@ -446,7 +446,8 @@ namespace MS_targeted
                                                   pairwiseTest,
                                                   string.Join(publicVariables.breakCharInFile.ToString(),
                                                     metaboliteLevels.List_SampleForTissueAndCharge.First().ListOfMetabolites.First().mtbltDetails.ListOfStats.RegressionValues.Select(x => x.clinical_data_name +
-                                                        "_pv" + publicVariables.breakCharInFile.ToString() + x.clinical_data_name + "_r2adjust")),
+                                                        "_pv" + publicVariables.breakCharInFile.ToString() + x.clinical_data_name + "_r2adjust" +
+                                                        publicVariables.breakCharInFile.ToString() + x.clinical_data_name + "_beta")),
                                                   "CAS",
                                                   "HMDB",
                                                   "KEGG",
@@ -485,7 +486,8 @@ namespace MS_targeted
                                               charge,
                                               pairwiseTest,
                                               string.Join(publicVariables.breakCharInFile.ToString(), metabolitePerPathway.ListOfStats.RegressionValues.Select(x => x.regrPvalue.ToString() +
-                                                publicVariables.breakCharInFile.ToString() + x.regrAdjRsquare.ToString())),
+                                                publicVariables.breakCharInFile.ToString() + x.regrAdjRsquare.ToString() +
+                                                publicVariables.breakCharInFile.ToString() + x.regrBeta.ToString())),
                                               metabolitePerPathway.In_Cas_id,
                                               metabolitePerPathway.In_Hmdb_id,
                                               metabolitePerPathway.In_Kegg_id,

@@ -33,14 +33,6 @@ namespace MS_targeted
                 Environment.Exit(0);
             }
 
-            //IEnumerable[] e = new IEnumerable[3];
-            //List<int> a = new List<int>() { 1, 2, 3, 4, 5 };
-            //List<int> b = new List<int>() { 4, 5, 6, 7, 8 };
-            ////IEnumerable[] e = new IEnumerable[] { a.ToArray(), b.ToArray() };
-            //List<int> c = new List<int>() { 4, 5, 6, 7, 8 };
-            //e.SetValue(c.ToArray(), 2);
-            ////e = new IEnumerable[] { e., c.ToArray() };
-
             Console.WriteLine("**** MS_targeted ****");
             Console.WriteLine("setting up input variables, files and folders");
             publicVariables.inputMSFilesDir = args[0];

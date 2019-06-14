@@ -682,6 +682,7 @@ namespace MS_targeted
                 public string clinical_data_name { get; set; }
                 public double regrPvalue { get; set; }
                 public double regrAdjRsquare { get; set; }
+                public double regrBeta { get; set; }
             }
         }
     }

@@ -172,8 +172,8 @@ namespace MS_targeted
             //in case we want to use Exact the we should change the limit of Exact from 10 to something greater by using maxExact = X (where X>10)
             //nCycle performs  a  complete  random  permutation,  instead  of  pairwise  exchanges, every nCycle cycles
             //run permutation test and take the pvalue
-            rEngineInstance.engine.Evaluate(string.Format(@"myres <- summary(lmPerm::lmp(as.numeric(df[,'{0}']) ~ {1}(df[,'{2}']){3}, perm = ""{4}"", seqs = {5}, " +
-                    @"center = {5}, projections = {5}, qr = {5}, maxIter = {6}, nCycle = {7}))",
+            rEngineInstance.engine.Evaluate(string.Format(@"myrestmp <- lmPerm::lmp(as.numeric(df[,'{0}']) ~ {1}(df[,'{2}']){3}, perm = ""{4}"", seqs = {5}, " +
+                    @"center = {5}, projections = {5}, qr = {5}, maxIter = {6}, nCycle = {7})",
                         columnNames[1],
                         (_typeof == "factor") ? "as.factor" : ((_typeof == "number") ? "as.numeric" : "Regression failed"),
                         columnNames[0],
@@ -183,8 +183,11 @@ namespace MS_targeted
                         publicVariables.numberOfPermutations,
                         (publicVariables.numberOfPermutations / 1000).ToString()));
 
+            rEngineInstance.engine.Evaluate(@"myres <- summary(myrestmp)");
+            rEngineInstance.engine.Evaluate(@"myresbeta <- unname(lm.beta::coef.lm.beta(lm.beta::lm.beta(myrestmp))[2])");
+
             //rEngineInstance.engine.Evaluate("print(myres)");
-            rEngineInstance.engine.Evaluate("rm(df, cofounders)");
+            rEngineInstance.engine.Evaluate("rm(df, cofounders, myrestmp)");
 
             //Re-enable Console printings
             Console.SetOut(stdOut);
@@ -193,7 +196,8 @@ namespace MS_targeted
             {
                 clinical_data_name = columnNames.First(),
                 regrPvalue = Math.Round(rEngineInstance.engine.Evaluate("myres$coefficients[2, 3]").AsNumeric().First(), 5),
-                regrAdjRsquare = Math.Round(rEngineInstance.engine.Evaluate("myres$adj.r.squared").AsNumeric().First(), 5)
+                regrAdjRsquare = Math.Round(rEngineInstance.engine.Evaluate("myres$adj.r.squared").AsNumeric().First(), 5),
+                regrBeta = Math.Round(rEngineInstance.engine.Evaluate("myresbeta").AsNumeric().First(), 5)
             };
         }
 

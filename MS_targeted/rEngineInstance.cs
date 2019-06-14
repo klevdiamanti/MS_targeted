@@ -119,6 +119,15 @@ namespace MS_targeted
             {
                 outputToLog.WriteErrorLine("There was an error while loading the R package RVAideMemoire. Please check that it is installed.");
             }
+
+            try
+            {
+                engine.Evaluate(@"library(lm.beta)");
+            }
+            catch (Exception)
+            {
+                outputToLog.WriteErrorLine("There was an error while loading the R package lm.beta. Please check that it is installed.");
+            }
             //engine.Evaluate(@"library(lmPerm); library(ggplot2); library(grid); library(gridExtra); library(coin); library(Hmisc); library(RcmdrMisc); library(RVAideMemoire);");
             #endregion
 
