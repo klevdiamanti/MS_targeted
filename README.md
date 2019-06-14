@@ -6,7 +6,7 @@ MS_targeted can handle multiple tissues and charges simultaneously.
 
 ## Notes
 - You will find the pre-compiled executables under [MS_targeted/exec/](MS_targeted/exec/MS_targeted.exe).
-- It is required that you have installed the latest version of mono and R 3.4.X. **Note:** MS_targeted will not run with R 3.5.X due to incompatibilities of the RDotNet package with the latest version of R.
+- It is required that you have installed the latest version of mono and R.
 - The R packages [lmPerm](https://cran.r-project.org/web/packages/lmPerm/index.html), [coin](https://cran.r-project.org/web/packages/coin/index.html), [gridExtra](https://cran.r-project.org/web/packages/gridExtra/index.html), [ggplot2](https://cran.r-project.org/web/packages/ggplot2/index.html), [Hmisc](https://cran.r-project.org/web/packages/Hmisc/index.html), [RcmdrMisc](https://cran.r-project.org/web/packages/RcmdrMisc/index.html), [RVAideMemoire](https://cran.r-project.org/web/packages/RVAideMemoire/index.html) and [lm.beta](https://cran.r-project.org/web/packages/lm.beta/index.html) are required to be pre-installed.
 - You will need to decompress the [database file](MS_targeted/sample_data/db/20171204_metabolites_db.tsv.zip) prior to running the pipeline.
 - Detailed explanation of the input files and options is provided in [MS_targeted_input.md](MS_targeted_input.md).
@@ -29,4 +29,4 @@ This file configures various parameters for MS_targeted. The sample file under [
 #### output_dir
 An existing or not existing output directory where all the output files will be written. Please note that if the directory exists it will be overwritten.
 ## Citation
-Klev Diamanti, Marco Cavalli, Gang Pan, Maria João Pereira, Chanchal Kumar, Stanko Skrtic, Manfred Grabherr, Ulf Risérus, Jan W Eriksson, Jan Komorowski and Claes Wadelius (2018). "Intra- and inter-individual metabolic profiling highlights carnitine and lysophosphatidylcholine pathways as key molecular defects in type 2 diabetes". Accepted - Scientific Reports.
+Klev Diamanti, Marco Cavalli, Gang Pan, Maria João Pereira, Chanchal Kumar, Stanko Skrtic, Manfred Grabherr, Ulf Risérus, Jan W Eriksson, Jan Komorowski and Claes Wadelius (2019). "Intra- and inter-individual metabolic profiling highlights carnitine and lysophosphatidylcholine pathways as key molecular defects in type 2 diabetes". Accepted - Scientific Reports.
