@@ -29,4 +29,4 @@ This file configures various parameters for MS_targeted. The sample file under [
 #### output_dir
 An existing or not existing output directory where all the output files will be written. Please note that if the directory exists it will be overwritten.
 ## Citation
-Klev Diamanti, Marco Cavalli, Gang Pan, Maria João Pereira, Chanchal Kumar, Stanko Skrtic, Manfred Grabherr, Ulf Risérus, Jan W Eriksson, Jan Komorowski and Claes Wadelius (2019). "Intra- and inter-individual metabolic profiling highlights carnitine and lysophosphatidylcholine pathways as key molecular defects in type 2 diabetes". Accepted - Scientific Reports.
+Klev Diamanti, Marco Cavalli, Gang Pan, Maria João Pereira, Chanchal Kumar, Stanko Skrtic, Manfred Grabherr, Ulf Risérus, Jan W Eriksson, Jan Komorowski and Claes Wadelius (2019). "Intra- and inter-individual metabolic profiling highlights carnitine and lysophosphatidylcholine pathways as key molecular defects in type 2 diabetes". Scientific Reports 9(1):9653.
