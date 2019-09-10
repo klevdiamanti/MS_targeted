@@ -172,13 +172,14 @@ namespace MS_targeted
             //in case we want to use Exact the we should change the limit of Exact from 10 to something greater by using maxExact = X (where X>10)
             //nCycle performs  a  complete  random  permutation,  instead  of  pairwise  exchanges, every nCycle cycles
             //run permutation test and take the pvalue
-            rEngineInstance.engine.Evaluate(string.Format(@"myrestmp <- lmPerm::lmp(as.numeric(df[,'{0}']) ~ {1}(df[,'{2}']){3}, perm = ""{4}"", seqs = {5}, " +
-                    @"center = {5}, projections = {5}, qr = {5}, maxIter = {6}, nCycle = {7})",
-                        columnNames[1],
+            rEngineInstance.engine.Evaluate(string.Format(@"myrestmp <- lmPerm::lmp({0}(df[,'{1}']) ~ as.numeric(df[,'{2}']){3}, perm = ""{4}"", seqs = {5}, " +
+                    @"center = {5}, projections = {6}, qr = {6}, maxIter = {7}, nCycle = {8})",
                         (_typeof == "factor") ? "as.factor" : ((_typeof == "number") ? "as.numeric" : "Regression failed"),
                         columnNames[0],
+                        columnNames[1],
                         rCovar.cof_string,
                         "Prob",
+                        "FALSE",
                         "TRUE",
                         publicVariables.numberOfPermutations,
                         (publicVariables.numberOfPermutations / 1000).ToString()));
@@ -191,6 +192,11 @@ namespace MS_targeted
 
             //Re-enable Console printings
             Console.SetOut(stdOut);
+
+            //Console.WriteLine("name " + columnNames.First());
+            //Console.WriteLine("pv " + Math.Round(rEngineInstance.engine.Evaluate("myres$coefficients[2, 3]").AsNumeric().First(), 5));
+            //Console.WriteLine("r2 " + Math.Round(rEngineInstance.engine.Evaluate("myres$adj.r.squared").AsNumeric().First(), 5));
+            //Console.WriteLine("beta " + Math.Round(rEngineInstance.engine.Evaluate("myresbeta").AsNumeric().First(), 5));
 
             return new msMetabolite.stats.regressValues()
             {
